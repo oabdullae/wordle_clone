@@ -1,0 +1,4 @@
+* we should have a kind of matrix that will store what is written on the screen
+* we should also have a kind of cursor that points where the player is writing
+* we also need a function that will convert any pressed key to its corresponding
+ascii-art letter, by printing it
