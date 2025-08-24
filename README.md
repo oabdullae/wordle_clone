@@ -2,3 +2,7 @@
 wordle clone built with ncurses in C.
 
 added this line
+
+```
+usleep(9000);
+```
