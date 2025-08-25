@@ -14,35 +14,53 @@ Actual algorithm:
             display main menu (New Game, Continue, Settings, Quit)
             switch (main_menu_choice) {
                 case 'New game':
-                    reset stuff to the starting state
+                    reset stuff to the starting state {
+                        - pick a random word_to_guess from the file
+
+                    }
                     display starting UI
-                    session_loop 6 attempts { // gives you 6 attempts or word-found win (exit loop)
-                        get_valid_word_loop { // gets a valid word 
-                            put cursor[COL] at the start internally and visually
-                            word[5]; to be filled by the loop below
-                            get_word_loop (or arrow) { // get a valid character (letter or arrow or enter or backspace)
-                                get input(can accept letters OR left and right arrows to move cursor)
-                                switch (input) {
-                                    case letter:
-                                        display it
-                                    case left or right arrows:
-                                        move cursor
-                                    case enter:
-                                        if too short: warning
-                                        else break out of the loop
-                                    case backspace:
-                                        delete letter at cursor
-                                    
-                                }
-                                process it (ignore invalid characters, reject enter if too short)
-                                apply it if valid (move cursor or print letter)
-                            } // loops while the characteer is invalid
-                            word[5] is now filled up
-                            verify if the word is valid
-                                if valid break out of the loop
-                                else loop again
-                        } // loops while the word is invalid 
-                        move cursor[ROW] down
+                    session_loop 6 attempts { // gives you 6 attempts or word-found win (exit loop), 1 attempt per iteration
+                        put cursor[COL] at the start internally and visually
+                        word[5]; to be filled by the loop below
+                        get_valid_word_loop { // get a valid character (letter or arrow or enter or backspace) per iteration
+                            get input(can accept letters OR left and right arrows to move cursor OR Enter OR backspace)
+                            switch (input) {
+                                case letter: // writing behavior
+                                    if (cell at cursor is empty)
+                                        display letter where the cursor is pointing, and update word[] the internal array
+                                        push cursor forward if not last cell (you cant go beyond last cell)
+                                    else 
+                                        do nothing or warning
+                                case left or right arrows:
+                                    move cursor
+                                case enter:
+                                    if too short(we have less than 5/5):
+                                        warning
+                                    else (we have a 5letter word)
+                                        if (word_to_guess == word) {
+                                            win
+                                            goto somewhere to restart game
+                                        } else {
+                                            if (word is in dictionary) {
+                                                color the letters appropriately in matrix (and in keyboard to be implemented later)
+                                                move cursor[ROW] down
+                                                break out of loop and goto next attempt
+                                            }
+                                            else { // word is not in dictionary
+                                                warning: word not found
+                                            }
+                                        }
+                                case backspace:
+                                    if (first cell or filled cell)
+                                        we delete the letter at cursor, and keep cursor at its position
+                                    else // not first and empty
+                                        we delete the cell before cursor and move cursor backwards
+                                case numbers:
+                                    game controls like ending the session, restarting, or quitting
+                                default:
+                                    // ignore
+                            }
+                        }                     
                     }
                 case 'Continue': (for later)
                     load last state (matrix, cursor, ...)
