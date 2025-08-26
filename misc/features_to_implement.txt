@@ -1,0 +1,5 @@
+- add continue
+- add settings
+- add stats in main menu 
+- automatic window resizing
+- 
