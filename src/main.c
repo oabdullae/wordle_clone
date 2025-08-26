@@ -1,16 +1,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ncurses.h>
 
 #define X 0
 #define Y 1
 #define RIGHT 1
 #define LEFT -1
-#define DOWN 1 //change it if incorrect
+#define DOWN 1
 
 //cursor edges | borders?
 #define FIRST_CELL_INDEX 0
-#define LAST_CELL_INDEX 4 
+#define LAST_CELL_INDEX 4
+
+typedef enum {
+    ROW,
+    COL
+} Coordinates;
 
 //temporary, just here so i don't get errors, ncurses can detect keystores anyway
 typedef enum {
@@ -29,17 +35,20 @@ enum Options{//turn this into define or smth later
 
 typedef struct {
     //put ur settings here 
+    int UI_width;
+    int UI_height;
 } Settings;
 
-struct {
+struct { // for storing the state of the game and can be used for the Continue feature
     int number_of_used_attempts;
     int cursor_position[2];
     char wordle_answer[6];//5 characters + \0
 
     //stores the matrix of your previous guesses in any game session
     //6 chars again because of line will have [ ][ ][ ][ ][ ][\0] (so we can use strcmp)
-    char history[6][6];
-} game_session;
+    char history_matrix[6][6];
+    bool game_ended; // true if game is not running
+} game_session; // game_session is a single variable that holds the game session
 //MARK: GAME_OBJECTS_END
 
 
@@ -62,8 +71,9 @@ void run_session();
 void settings_menu();
 void reset_game_session();
 void exit_prompt();
+int main_menu(int window_size[2]);
 //idk datatype that ncurses takes as keystrokes so i just put this temprorarily
-bool isLetter(Key_stroke key_stroke);
+bool isLetter(int key_stroke);
 
 
 
@@ -73,13 +83,25 @@ bool isLetter(Key_stroke key_stroke);
 
 //MARK: START
 int main(int argc, char** argv) {
+    // set up ncurses
+    initscr(); // init ncurses mode
+    noecho(); // suppresses character printing
+    curs_set(1); // to hide the terminal cursor
+    start_color(); // ncurses function to start the color mode
 
     //verify window size block if not big enough
-    //load last session, idk (or maybe only load it only if continue ? )
+    int window_size[2];
+    getmaxyx(stdscr, window_size[ROW], window_size[COL]);
+    if (window_size[ROW] < 70 /* to update later */|| window_size[COL] < 100/* to update later */) {
+        mvprintw(0, 0,"You need a bigger window to play!!"); // to be centered later
+        goto GAME_END;
+    }
+
+    // load last session, idk (or maybe only load it only if continue ? ) 
     
 
+    int menu_input = main_menu(window_size);
     MAIN_MENU:
-    int menu_input;
     //wait for input with ncurses or smth
     switch(menu_input) {
         case NEW_GAME:
@@ -92,7 +114,7 @@ int main(int argc, char** argv) {
             run_session();
             break;
         case SETTINGS:
-            settings_menu();//to be implemented
+            settings_menu();//to be implemented later
             break;
         case QUIT:
             goto GAME_END;
@@ -104,6 +126,9 @@ int main(int argc, char** argv) {
 
     exit_prompt();
     
+    getch(); // temporary
+    curs_set(1); // to set back the terminal cursor
+    endwin(); // to end the ncurses mode
 }
 
 //MARK: END
@@ -114,7 +139,11 @@ int main(int argc, char** argv) {
 
 
 //MARK: DEFINITIONS
-void settings_menu() {
+int main_menu(int window_size[2]) {
+
+}
+
+void settings_menu() { // for later
 
 }
 
@@ -163,7 +192,7 @@ void run_session() {
                         else if(is_valid_word(wordle_guess)) {
                             //update the UI aka
                             //color the letters apporpriately
-                            //update session_history matrix; game_session.history[][6];
+                            //update session_history matrix; game_session.history_matrix[][6];
                             //only reaches here if word is valid but not correct so we used an attempt 
                             ++game_session.number_of_used_attempts;
 
@@ -217,7 +246,7 @@ void reset_game_session() {
 }
 
 
-bool isLetter(Key_stroke key_stroke) {
+bool isLetter(int key_stroke) {
     // .......a-z....A-Z..... I basically check if it's in the dots, if yes, then it's not letter
     if(key_stroke < 'a' || key_stroke > 'Z' || (key_stroke > 'z' && key_stroke < 'A')) {
         return false;
