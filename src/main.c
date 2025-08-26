@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <ncurses.h>
+#include "header.h"
 
 #define X 0
 #define Y 1
@@ -13,25 +14,9 @@
 #define FIRST_CELL_INDEX 0
 #define LAST_CELL_INDEX 4
 
-typedef enum {
-    ROW,
-    COL
-} Coordinates;
 
-//temporary, just here so i don't get errors, ncurses can detect keystores anyway
-typedef enum {
-    LEFT_KEY,
-    RIGHT_KEY,
-    ENTER_KEY,
-    BACK_SPACE_KEY,
-} Key_stroke;
 //MARK: GAME OBJECTS_START
-enum Options{//turn this into define or smth later
-    NEW_GAME,
-    CONTINUE,
-    SETTINGS,
-    QUIT
-};
+
 
 typedef struct {
     //put ur settings here 
@@ -72,6 +57,7 @@ void settings_menu();
 void reset_game_session();
 void exit_prompt();
 int main_menu(int window_size[2]);
+bool is_valid_word();
 //idk datatype that ncurses takes as keystrokes so i just put this temprorarily
 bool isLetter(int key_stroke);
 
@@ -86,47 +72,55 @@ int main(int argc, char** argv) {
     // set up ncurses
     initscr(); // init ncurses mode
     noecho(); // suppresses character printing
-    curs_set(1); // to hide the terminal cursor
+    curs_set(0); // to hide the terminal cursor
+    keypad(stdscr, TRUE); // to allow arrrow keys and F1-F12 keys
     start_color(); // ncurses function to start the color mode
 
     //verify window size block if not big enough
     int window_size[2];
     getmaxyx(stdscr, window_size[ROW], window_size[COL]);
-    if (window_size[ROW] < 70 /* to update later */|| window_size[COL] < 100/* to update later */) {
-        mvprintw(0, 0,"You need a bigger window to play!!"); // to be centered later
-        goto GAME_END;
+    if (window_size[ROW] < MENU_HEIGHT || window_size[COL] < MENU_WIDTH/* to update later */) {
+        curs_set(1);
+        endwin();
+        printf("+==================================+\n");
+        printf("|You need a bigger window to play!!|\n");
+        printf("|Needed Rows: %2d, Your Rows: %2d    |\n", MENU_HEIGHT, window_size[ROW]);
+        printf("|Needed Cols: %2d, Your Cols: %2d    |\n", MENU_WIDTH, window_size[COL]);
+        printf("+==================================+\n");
+        return -1;
     }
-
     // load last session, idk (or maybe only load it only if continue ? ) 
     
-
+    
     int menu_input = main_menu(window_size);
     MAIN_MENU:
     //wait for input with ncurses or smth
     switch(menu_input) {
         case NEW_GAME:
-
-            reset_game_session(); //which will pick new word
-            run_session();
-            break;
+        getch();
+        // reset_game_session(); //which will pick new word
+        // run_session();
+        break;
         case CONTINUE:
-            //continue session without change
-            run_session();
-            break;
+        getch();
+        //continue session without change
+        // run_session();
+        break;
         case SETTINGS:
-            settings_menu();//to be implemented later
-            break;
+        getch();
+        // settings_menu();//to be implemented later
+        break;
         case QUIT:
-            goto GAME_END;
-            break;
+        goto GAME_END;
+        break;
         //no need for default since do nothing! 
     }
     GAME_END:
-
-
-    exit_prompt();
     
-    getch(); // temporary
+    
+    // exit_prompt();
+    
+    // getch(); // temporary
     curs_set(1); // to set back the terminal cursor
     endwin(); // to end the ncurses mode
 }
@@ -134,7 +128,7 @@ int main(int argc, char** argv) {
 //MARK: END
 
 
-
+#if 0
 
 
 
@@ -167,21 +161,21 @@ void run_session() {
         while(1) {
             //take input
             
-            key_stroke;
+            int key_stroke;
             switch(key_stroke) {
-                case LEFT_KEY:
+                case KEY_LEFT:
                     if(game_session.cursor_position[X] != FIRST_CELL_INDEX) {
                         game_session.cursor_position[X] += LEFT;
                         //update UI cursor position
                     }//else do nothing
                     break;
-                case RIGHT_KEY:
+                case KEY_RIGHT:
                     if(game_session.cursor_position[X] != LAST_CELL_INDEX) {
                         game_session.cursor_position[X] += RIGHT;
                         //update UI cursor position
                     }
                     break;
-                case ENTER_KEY:
+                case '\n':
                     if(number_of_entered_letters < 5) {
                         // display too short 
                     } else {
@@ -207,7 +201,7 @@ void run_session() {
                             break; //exit the switch case and wait for new input
                         }
                     }
-                case BACK_SPACE_KEY:
+                case KEY_BACKSPACE:
                     //NOTE:  wordle_guess[game_session.cursor_position[X]] is basically current cell pointed by cursor
                     //        and see if it's not space aka not empty, i decided that ' ' == empty
                     if(game_session.cursor_position[X] == FIRST_CELL_INDEX || wordle_guess[game_session.cursor_position[X]] != ' ') {
@@ -261,3 +255,5 @@ if isEmpty():
   isNotLastCell(): 
        move cursor forward;
  */
+
+ #endif
