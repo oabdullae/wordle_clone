@@ -57,12 +57,12 @@ void cell_grid_animation(int top, int left, int bottom, int right, int window_si
     for (int i = top, k = 0; k < MENU_WIDTH-2 || i <= bottom ; i++, k++) {
         if (i <= bottom) {
             // the 2 left internal border-columns of the grid get drawn from top to bottom
-            mvprintw(i , menu_start_col + (2 + CELL_WIDTH)*1, "  "); // the added 2 is the size of the column-border
-            mvprintw(i , menu_start_col + (2 + CELL_WIDTH)*2, "  ");
+            mvprintw(i, menu_start_col + (2 + CELL_WIDTH)*1, "  "); // the added 2 is the size of the column-border
+            mvprintw(i, menu_start_col + (2 + CELL_WIDTH)*2, "  ");
             
             // the 2 right internal border-colums of the grid get drawn from bottom to top
-            mvprintw((bottom+2) - i , menu_start_col + (2 + CELL_WIDTH)*3, "  ");
-            mvprintw((bottom+2) - i , menu_start_col + (2 + CELL_WIDTH)*4, "  ");
+            mvprintw(bottom - k, menu_start_col + (2 + CELL_WIDTH)*3, "  ");
+            mvprintw(bottom - k, menu_start_col + (2 + CELL_WIDTH)*4, "  ");
         }
 
         if (k < MENU_WIDTH-2) {
