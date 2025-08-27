@@ -24,16 +24,7 @@ typedef struct {
     int UI_height;
 } Settings;
 
-struct { // for storing the state of the game and can be used for the Continue feature
-    int number_of_used_attempts;
-    int cursor_position[2];
-    char wordle_answer[6];//5 characters + \0
 
-    //stores the matrix of your previous guesses in any game session
-    //6 chars again because of line will have [ ][ ][ ][ ][ ][\0] (so we can use strcmp)
-    char history_matrix[6][6];
-    bool game_ended; // true if game is not running
-} game_session; // game_session is a single variable that holds the game session
 //MARK: GAME_OBJECTS_END
 
 
