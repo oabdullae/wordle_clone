@@ -82,11 +82,12 @@ int main(int argc, char** argv) {
     if (window_size[ROW] < MENU_HEIGHT || window_size[COL] < MENU_WIDTH/* to update later */) {
         curs_set(1);
         endwin();
-        printf("+==================================+\n");
-        printf("|You need a bigger window to play!!|\n");
-        printf("|Needed Rows: %2d, Your Rows: %2d    |\n", MENU_HEIGHT, window_size[ROW]);
-        printf("|Needed Cols: %2d, Your Cols: %2d    |\n", MENU_WIDTH, window_size[COL]);
-        printf("+==================================+\n");
+        printf("+======================================+\n");
+        printf("|  You need a bigger window to play!!  |\n");
+        printf("|  Needed Rows: %3d, Your Rows: %3d %s |\n", MENU_HEIGHT, window_size[ROW], ((window_size[ROW] < MENU_HEIGHT) ? "<-" : "  "));
+        printf("|  Needed Cols: %3d, Your Cols: %3d %s |\n", MENU_WIDTH, window_size[COL], ((window_size[COL] < MENU_WIDTH) ? "<-" : "  "));
+        printf("|Try maximizing your window or zoom out|\n");
+        printf("+======================================+\n");
         return -1;
     }
     // load last session, idk (or maybe only load it only if continue ? ) 

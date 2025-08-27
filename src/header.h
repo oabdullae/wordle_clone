@@ -1,8 +1,8 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-#define MENU_WIDTH  94
-#define MENU_HEIGHT 51
+#define MENU_WIDTH  102
+#define MENU_HEIGHT 55
 
 typedef enum {
     ROW,

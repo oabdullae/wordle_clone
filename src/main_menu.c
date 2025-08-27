@@ -1,18 +1,22 @@
 #include <ncurses.h>
 #include "header.h"
 
+void spiral_clearing_animation(int top, int left, int bottom, int right);
+
 int main_menu(int window_size[2]) {
-    int current_row = 1;
+    int current_row = (window_size[ROW] - MENU_HEIGHT)/2 + 1;
     int underlines_positions[4]; // to store the lines that show what option is selected
 
     // drawing main menu border
     attron(A_STANDOUT);
     // horizontal border-sides
-    mvprintw(0, (window_size[COL] - MENU_WIDTH)/2, "                                                                                              ");
-    mvprintw(MENU_HEIGHT-1, (window_size[COL] - MENU_WIDTH)/2, "                                                                                              ");
+    for (int i = 0; i < MENU_WIDTH; ++i) {
+        mvaddch((window_size[ROW] - MENU_HEIGHT)/2, (window_size[COL] - MENU_WIDTH)/2 + i, ' ');
+        mvaddch((window_size[ROW] - MENU_HEIGHT)/2 + MENU_HEIGHT-1, (window_size[COL] - MENU_WIDTH)/2 + i, ' ');
+    }
 
     // vertical border-sides
-    for (int i = 1; i < MENU_HEIGHT; ++i) {
+    for (int i = (window_size[ROW] - MENU_HEIGHT)/2; i < MENU_HEIGHT + (window_size[ROW] - MENU_HEIGHT)/2; ++i) {
         mvprintw(i, (window_size[COL] - MENU_WIDTH)/2, "  "); // left border-column
         mvprintw(i, (window_size[COL] - MENU_WIDTH)/2 + MENU_WIDTH-2, "  "); // right border-column
     }
@@ -107,7 +111,8 @@ int main_menu(int window_size[2]) {
                 attroff(A_BLINK | A_STANDOUT);
                 break;
             case '\n':
-                // fading_animation(); // main menu will fade with a beautiful animation by Haytam
+                // main menu will fade with a beautiful spiral animation by Haytam
+                spiral_clearing_animation((window_size[ROW] - MENU_HEIGHT)/2 + 1, (window_size[COL] - MENU_WIDTH)/2 + 2, (window_size[ROW] - MENU_HEIGHT)/2 + MENU_HEIGHT-2, (window_size[COL] - MENU_WIDTH)/2 + MENU_WIDTH - 3);
                 return menu_choice;
             // default: just ignore it and loop back
         }
