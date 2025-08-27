@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <unistd.h>
+#include "header.h"
 
 void spiral_clearing_animation(int top, int left, int bottom, int right) {
     // spiral algorithm by Haytam
@@ -48,34 +49,37 @@ void spiral_clearing_animation(int top, int left, int bottom, int right) {
     }
 }
 
-void cell_grid_animation(int top, int left, int bottom, int right,int window_size[2]){
-    int speed=10000;
+void cell_grid_animation(int top, int left, int bottom, int right, int window_size[2]) {
+    int speed = 10000;
     int menu_start_col = (window_size[COL] - MENU_WIDTH)/2;
     int menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2; // they start with borders included btw
     attron(A_STANDOUT);
-    for (int i = top, k=0;k<MENU_WIDTH-2 || i <= bottom ; i++,k++) {
-        if(i <= bottom){
-                //from top to bottom
-                mvprintw(i , menu_start_col + (2 + CELL_WIDTH)*1, "  ");
-                mvprintw(i , menu_start_col + (2 + CELL_WIDTH)*2, "  ");
-                //from bottom to top
-                mvprintw((bottom+2) - i , menu_start_col + (2 + CELL_WIDTH)*3, "  ");
-                mvprintw((bottom+2) - i , menu_start_col + (2 + CELL_WIDTH)*4, "  ");
+    for (int i = top, k = 0; k < MENU_WIDTH-2 || i <= bottom ; i++, k++) {
+        if (i <= bottom) {
+            // the 2 left internal border-columns of the grid get drawn from top to bottom
+            mvprintw(i , menu_start_col + (2 + CELL_WIDTH)*1, "  "); // the added 2 is the size of the column-border
+            mvprintw(i , menu_start_col + (2 + CELL_WIDTH)*2, "  ");
+            
+            // the 2 right internal border-colums of the grid get drawn from bottom to top
+            mvprintw((bottom+2) - i , menu_start_col + (2 + CELL_WIDTH)*3, "  ");
+            mvprintw((bottom+2) - i , menu_start_col + (2 + CELL_WIDTH)*4, "  ");
         }
-        if(k<MENU_WIDTH-2){
-                //from left to right
-                mvaddch(menu_start_row + (1 + CELL_HEIGHT)*1 , left+k, ' ');
-                mvaddch(menu_start_row + (1 + CELL_HEIGHT)*2 , left+k , ' ');
-                //from right to left
-                mvaddch(menu_start_row + (1 + CELL_HEIGHT)*4 , right-k , ' ');
-                mvaddch(menu_start_row + (1 + CELL_HEIGHT)*5 , right-k  , ' ');
-                //from med to born
-                mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3 , left + ((right-left )/2) + (k/2) , ' ');
-                mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3 , left + ((right-left )/2 )- (k/2) , ' ');
+
+        if (k < MENU_WIDTH-2) {
+            // the 2 top internal border-rows of the grid get drawn from left to right
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*1 , left + k, ' '); // the added 1 is the size of the row-border
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*2 , left + k , ' ');
+
+            // the 2 bottom internal border-rows of the grid get drawn from right to left
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*4, right - k, ' ');
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*5, right - k, ' ');
+            
+            //the midlle internal border-row of the grid gets drwan from the middle to the sides
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3, left + ((right - left)/2) + (k/2), ' '); // right - left is just the width
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3, left + ((right - left)/2 )- (k/2), ' ');
         }
         refresh();
         usleep(speed);
     }
     attroff(A_STANDOUT);
-
 }

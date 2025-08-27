@@ -3,9 +3,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <time.h>
+// #include <time.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include "header.h"
 
 #define WORDS_NUMBER 2315
 #define LINE_NUM_B 141
@@ -33,11 +34,11 @@
 #define LINE_NUM_Y 2306
 #define LINE_NUM_Z 2312
 
-int random_word(char *buffer){
+int pick_random_word(char *buffer) {
     int fd = open("wordle_answers.txt", O_RDONLY);
 
     if (fd == -1) {
-        perror("Failed to open\n");
+        perror("open");
         return -1;
     }
 
@@ -47,7 +48,7 @@ int random_word(char *buffer){
         return -1;
     }
 
-    int bytesRead = read(fd, buffer, 5);
+    int bytesRead = read(fd, buffer, WORD_LENGTH);
     if (bytesRead != 5) {
         perror("read");
         close(fd);
@@ -59,7 +60,7 @@ int random_word(char *buffer){
     return 0;
 }
 
-bool is_valid(char* word){
+bool is_word_english(char* word){
     int offset = 0, max_offset = 2315;
 
     for (int i = 0; i < 5; i++)
@@ -140,6 +141,7 @@ bool is_valid(char* word){
     return false; 
 }
 
+#if 0
 int main (){
     srand(time(NULL) * getpid());
     char buffer[6], word[6];
@@ -154,3 +156,4 @@ int main (){
     }
     return 0;
 }
+#endif

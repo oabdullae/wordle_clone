@@ -2,4 +2,4 @@
 - add settings
 - add stats in main menu 
 - automatic window resizing
-- 
+- encrypt wordle_answers.txt with a simple encrypting algorithm like ROT13
