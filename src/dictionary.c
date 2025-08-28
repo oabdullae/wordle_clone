@@ -39,20 +39,26 @@ int pick_random_word(char *buffer) {
 
     if (fd == -1) {
         perror("open");
-        return -1;
+        curs_set(1);
+        endwin();
+        exit(1);
     }
 
     if (lseek(fd, (rand() % WORDS_NUMBER) * 6, SEEK_SET) == -1) {
         perror("lseek");
         close(fd);
-        return -1;
+        curs_set(1);
+        endwin();
+        exit(1);
     }
 
     int bytesRead = read(fd, buffer, WORD_LENGTH);
     if (bytesRead != 5) {
         perror("read");
         close(fd);
-        return -1;
+        curs_set(1);
+        endwin();
+        exit(1);
     }
 
     buffer[5] = '\0';
@@ -61,69 +67,79 @@ int pick_random_word(char *buffer) {
 }
 
 bool is_word_english(char* word){
-    int offset = 0, max_offset = 2315;
+    int start_line = 0, end_line = WORDS_NUMBER-1;
 
     for (int i = 0; i < 5; i++)
         word[i] = tolower((unsigned char)word[i]);
 
-    if(word[0] < 'a' || word[0] > 'z')
-        return false;
+    if(word[0] < 'a' || word[0] > 'z'){
+        curs_set(1);
+        endwin();
+        exit(1);
+    }
+        
 
     switch (word[0]){
-        case 'b': offset = LINE_NUM_B; max_offset = LINE_NUM_C-1; break;
-        case 'c': offset = LINE_NUM_C; max_offset = LINE_NUM_D-1; break;
-        case 'd': offset = LINE_NUM_D; max_offset = LINE_NUM_E-1; break;
-        case 'e': offset = LINE_NUM_E; max_offset = LINE_NUM_F-1; break;
-        case 'f': offset = LINE_NUM_F; max_offset = LINE_NUM_G-1; break;
-        case 'g': offset = LINE_NUM_G; max_offset = LINE_NUM_H-1; break;
-        case 'h': offset = LINE_NUM_H; max_offset = LINE_NUM_I-1; break;
-        case 'i': offset = LINE_NUM_I; max_offset = LINE_NUM_J-1; break;
-        case 'j': offset = LINE_NUM_J; max_offset = LINE_NUM_K-1; break;
-        case 'k': offset = LINE_NUM_K; max_offset = LINE_NUM_L-1; break;
-        case 'l': offset = LINE_NUM_L; max_offset = LINE_NUM_M-1; break;
-        case 'm': offset = LINE_NUM_M; max_offset = LINE_NUM_N-1; break;
-        case 'n': offset = LINE_NUM_N; max_offset = LINE_NUM_O-1; break;
-        case 'o': offset = LINE_NUM_O; max_offset = LINE_NUM_P-1; break;
-        case 'p': offset = LINE_NUM_P; max_offset = LINE_NUM_Q-1; break;
-        case 'q': offset = LINE_NUM_Q; max_offset = LINE_NUM_R-1; break;
-        case 'r': offset = LINE_NUM_R; max_offset = LINE_NUM_S-1; break;
-        case 's': offset = LINE_NUM_S; max_offset = LINE_NUM_T-1; break;
-        case 't': offset = LINE_NUM_T; max_offset = LINE_NUM_U-1; break;
-        case 'u': offset = LINE_NUM_U; max_offset = LINE_NUM_V-1; break;
-        case 'v': offset = LINE_NUM_V; max_offset = LINE_NUM_W-1; break;
-        case 'w': offset = LINE_NUM_W; max_offset = LINE_NUM_Y-1; break;
+        case 'b': start_line = LINE_NUM_B; end_line = LINE_NUM_C-1; break;
+        case 'c': start_line = LINE_NUM_C; end_line = LINE_NUM_D-1; break;
+        case 'd': start_line = LINE_NUM_D; end_line = LINE_NUM_E-1; break;
+        case 'e': start_line = LINE_NUM_E; end_line = LINE_NUM_F-1; break;
+        case 'f': start_line = LINE_NUM_F; end_line = LINE_NUM_G-1; break;
+        case 'g': start_line = LINE_NUM_G; end_line = LINE_NUM_H-1; break;
+        case 'h': start_line = LINE_NUM_H; end_line = LINE_NUM_I-1; break;
+        case 'i': start_line = LINE_NUM_I; end_line = LINE_NUM_J-1; break;
+        case 'j': start_line = LINE_NUM_J; end_line = LINE_NUM_K-1; break;
+        case 'k': start_line = LINE_NUM_K; end_line = LINE_NUM_L-1; break;
+        case 'l': start_line = LINE_NUM_L; end_line = LINE_NUM_M-1; break;
+        case 'm': start_line = LINE_NUM_M; end_line = LINE_NUM_N-1; break;
+        case 'n': start_line = LINE_NUM_N; end_line = LINE_NUM_O-1; break;
+        case 'o': start_line = LINE_NUM_O; end_line = LINE_NUM_P-1; break;
+        case 'p': start_line = LINE_NUM_P; end_line = LINE_NUM_Q-1; break;
+        case 'q': start_line = LINE_NUM_Q; end_line = LINE_NUM_R-1; break;
+        case 'r': start_line = LINE_NUM_R; end_line = LINE_NUM_S-1; break;
+        case 's': start_line = LINE_NUM_S; end_line = LINE_NUM_T-1; break;
+        case 't': start_line = LINE_NUM_T; end_line = LINE_NUM_U-1; break;
+        case 'u': start_line = LINE_NUM_U; end_line = LINE_NUM_V-1; break;
+        case 'v': start_line = LINE_NUM_V; end_line = LINE_NUM_W-1; break;
+        case 'w': start_line = LINE_NUM_W; end_line = LINE_NUM_Y-1; break;
         case 'x': return false;
-        case 'y': offset = LINE_NUM_Y; max_offset = LINE_NUM_Z-1; break;
-        case 'z': offset = LINE_NUM_Z; max_offset = 2315; break;
-        default: offset = 0; max_offset = LINE_NUM_B-1;
+        case 'y': start_line = LINE_NUM_Y; end_line = LINE_NUM_Z-1; break;
+        case 'z': start_line = LINE_NUM_Z; end_line = WORDS_NUMBER-1; break;
+        default: start_line = 0; end_line = LINE_NUM_B-1;
     }
 
     char buffer[6]; 
-    int low = offset;
-    int high = max_offset; 
+    int low = start_line;
+    int high = end_line; 
 
     int fd = open("wordle_answers.txt", O_RDONLY);
     if (fd == -1) {
         perror("Failed to open\n");
-        return false;
+        curs_set(1);
+        endwin();
+        exit(1);
     }
 
     while (low <= high) {
         int mid = (low + high) / 2;
 
-        if (lseek(fd, mid * 6, SEEK_SET) == -1) {
+        if (lseek(fd, mid * (WORD_LENGTH+1), SEEK_SET) == -1) {
             perror("lseek");
             close(fd);
-            return false;
+            curs_set(1);
+            endwin();
+            exit(1);
         }
 
-        int bytesRead = read(fd, buffer, 5);
-        if (bytesRead != 5) {
+        int bytesRead = read(fd, buffer, WORD_LENGTH);
+        if (bytesRead != WORD_LENGTH) {
             perror("read");
             close(fd);
-            return false;
+            curs_set(1);
+            endwin();
+            exit(1);
         }
-        buffer[5] = '\0'; 
+        buffer[WORD_LENGTH] = '\0'; 
 
         int cmp = strcmp(buffer, word);
 

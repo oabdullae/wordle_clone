@@ -8,6 +8,7 @@ int pick_random_word(char *buffer);
 void change_cursor(Game_Session *game_session, int action);
 void print_ascii_letter(Game_Session *game_session, Ascii_Art_Letter letters_vector[26], char letter);
 void delete_ascii_letter(Game_Session *game_session);
+bool is_word_english(char* word)
 // void move_cursor(Game_Session *game_session, int attempt, int old_cursor, int new_cursor);
 
 void reset_game_session(Game_Session *game_session, int window_size[2]) {
@@ -66,19 +67,19 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
 
                     }//else do nothing
                     break;
-                /*
                 case '\n':
-                    if(number_of_entered_letters < 5) {
+                    if(game_session->entered_letters < 5) {
                         // display too short 
                     } else {
-                        if(strcmp(game_session.wordle_answer, wordle_guess) == 0) {
-                            //you win
+                        if(strcmp(game_session->wordle_answer, game_session->history_matrix[game_session->current_attempt]) == 0) {
+                            //you win update ui
                             goto SESSION_END;
                         }
-                        else if(is_valid_word(wordle_guess)) {
+                        else if(is_word_english(game_session->history_matrix[game_session->current_attempt])) {
                             //update the UI aka
                             //color the letters apporpriately
                             //update session_history matrix; game_session.history_matrix[][6];
+                            
                             //only reaches here if word is valid but not correct so we used an attempt 
                             ++game_session.number_of_used_attempts;
 
@@ -93,7 +94,6 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                             break; //exit the switch case and wait for new input
                         }
                     }
-                */
                 case KEY_BACKSPACE:
                     //NOTE:  wordle_guess[game_session.cursor_position[X]] is basically current cell pointed by cursor
                     //        and see if it's not space aka not empty, i decided that ' ' == empty
