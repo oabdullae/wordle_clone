@@ -25,3 +25,42 @@ void change_cursor(Game_Session *game_session, int action) {
     attroff((action == DELETE_CURSOR) ? A_STANDOUT : (COLOR_PAIR(BLUE)));
     refresh();
 }
+
+/*
+void highlight_letter(Game_Session *game_session, int color, int index, int attempt, int window_size[2]) {
+    int cell_width = 18;
+    int cell_height = 8;
+    int menu_width = 102;
+    int menu_height = 55;
+
+    // Setup color
+    if(color == 8){
+        init_pair(color, COLOR_WHITE, 8);
+    }
+    if(color == 9){
+        init_pair(color, COLOR_WHITE, 9);
+    }
+    if(color == 10){
+        init_pair(color, COLOR_WHITE, 10);
+    }
+
+    // Menu top-left corner
+    int menu_start_col = (window_size[COL] - menu_width) / 2;
+    int menu_start_row = (window_size[ROW] - menu_height) / 2;
+
+    // Cell top-left corner (inside grid)
+    int letter_row = menu_start_row + (1 + cell_height) * attempt + 1;
+    int letter_col = menu_start_col + (2 + cell_width) * index + 2;
+    game_session->history_matrix[]
+    
+    // Loop over the cell area
+    for (int i = 0; i < cell_height; i++) {
+        mvprintw(letter_row + i, letter_col, "HHHHHHHHHHHHHHHHH ");
+        attron(COLOR_PAIR(color));
+        mvprintw(letter_row + i, letter_col, "%s", game_session->history_matrix[letter_row + i][menu_start_row + (1 + CELL_HEIGHT)*attempt ]);//matrix only take letter normal way
+        attroff(COLOR_PAIR(color));
+    }
+
+    refresh();
+}
+*/
