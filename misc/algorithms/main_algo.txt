@@ -29,6 +29,7 @@ Actual algorithm:
                                     if (cell at cursor is empty)
                                         display letter where the cursor is pointing, and update word[] the internal array
                                         push cursor forward if not last cell (you cant go beyond last cell)
+                                        increment entered_letters
                                     else 
                                         do nothing or warning
                                 case left or right arrows:
@@ -55,6 +56,12 @@ Actual algorithm:
                                         we delete the letter at cursor, and keep cursor at its position
                                     else // not first and empty
                                         we delete the cell before cursor and move cursor backwards
+                                        
+                                    // optimizing the above if-else block
+                                    if (not first and empty)
+                                        move the cursor backwards (internally and visually)
+                                    we delete letter at cursor, and decrement the enetered_letters counter
+                                    
                                 case numbers:
                                     game controls like ending the session, restarting, or quitting
                                 default:

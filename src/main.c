@@ -5,17 +5,12 @@
 #include <ncurses.h>
 #include <time.h>
 #include <unistd.h>
+// #include <pthread.h>
 #include "header.h"
 
 #define X 0
 #define Y 1
-#define RIGHT 1
-#define LEFT -1
-#define DOWN 1
 
-//cursor edges | borders?
-#define FIRST_CELL_INDEX 0
-#define LAST_CELL_INDEX 4
 
 
 //MARK: GAME OBJECTS_START
@@ -43,15 +38,23 @@ typedef struct {
 
 
 
-
+// int counter = 0;
+// int tick = 0;
 
 //MARK: PROTOTYPES
-void run_session();
+void run_session(Game_Session *game_session);
 void settings_menu();
-void reset_game_session(Game_Session *game_session);
+void reset_game_session(Game_Session *game_session, int window_size[2]);
 void exit_prompt();
 int main_menu(int window_size[2]);
 void cell_grid_animation(int top, int left, int bottom, int right, int window_size[2]);
+void init_game_colors();
+// void *game_timer();
+// void alarm_handler() {
+//     counter++;
+//     tick = 0;
+//     alarm(1);
+// }
 bool is_valid_word();
 //idk datatype that ncurses takes as keystrokes so i just put this temprorarily
 bool isLetter(int key_stroke);
@@ -70,6 +73,7 @@ int main(int argc, char** argv) {
     curs_set(0); // to hide the terminal cursor
     keypad(stdscr, TRUE); // to allow arrrow keys and F1-F12 keys
     start_color(); // ncurses function to start the color mode
+    init_game_colors();
 
     srand(time(NULL) * getpid());
 
@@ -98,11 +102,29 @@ int main(int argc, char** argv) {
         switch(menu_input) {
             case NEW_GAME:
                 cell_grid_animation(menu_start_row + 1, menu_start_col + 2, menu_start_row + MENU_HEIGHT-1, menu_start_col + MENU_WIDTH - 3, window_size);
-                reset_game_session(&game_session); //which will pick new word
-                // start timer <<<<<<<
+                reset_game_session(&game_session, window_size); //which will pick new word
+                run_session(&game_session);
+                // start timer, timer is gonna be a new thread that will sleep every second and whenever it wakes up it is gonna increment the time by one second
+                // pthread_t timer_thread;
+                // pthread_create(&timer_thread, NULL, game_timer, NULL);
+                // if (alarm(1) == -1) {
+                //     curs_set(1);
+                //     endwin();
+                //     return -1;
+                // }
+                // while (1) {
+                //     if (tick == 1) {
+                //         tick = 0;
+                //         mvprintw(6, 6, "%d", counter);
+                //         refresh();
+                //         usleep(1000000);
+                //     }
+
+                // }
 
                 getch();
                 // run_session();
+                // pthread_join(timer_thread, NULL); // I dont care about the retval
                 break;
 
             case CONTINUE:
