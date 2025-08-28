@@ -6,6 +6,8 @@
 
 int pick_random_word(char *buffer);
 void change_cursor(Game_Session *game_session, int action);
+void print_ascii_letter(Game_Session *game_session, Ascii_Art_Letter letters_vector[26], char letter);
+void delete_ascii_letter(Game_Session *game_session);
 // void move_cursor(Game_Session *game_session, int attempt, int old_cursor, int new_cursor);
 
 void reset_game_session(Game_Session *game_session, int window_size[2]) {
@@ -27,7 +29,7 @@ void reset_game_session(Game_Session *game_session, int window_size[2]) {
     /* temporary debug */mvprintw(0, 0, "randomly picked word: %s", game_session->wordle_answer);
 }
 
-void run_session(Game_Session *game_session) { // skeleton made by Anas
+void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]) { // skeleton made by Anas
     char wordle_guess[6] = {"     "}; //spaces means empty
     int key_stroke/* , number_of_entered_letters = 0 */;//rename to something less verbose
     //works with a game session that already exists
@@ -112,16 +114,17 @@ void run_session(Game_Session *game_session) { // skeleton made by Anas
                     game_session->history_matrix[game_session->current_attempt][game_session->cursor] = ' ';
                         
                     // delete letter in UI
-                    // delete_ascii_letter(); TODO
+                    delete_ascii_letter(game_session); // TODO
 
-                    /* debug */ mvprintw(game_session->menu_start_row + 2  + game_session->current_attempt * (CELL_HEIGHT + 1),
-                                            game_session->menu_start_col + 3 + game_session->cursor * (CELL_WIDTH + 2),
-                                            " "
-                                        );
+                    // /* debug */ mvprintw(game_session->menu_start_row + 2  + game_session->current_attempt * (CELL_HEIGHT + 1),
+                    //                         game_session->menu_start_col + 3 + game_session->cursor * (CELL_WIDTH + 2),
+                    //                         " "
+                    //                     ); // kept for history
 
                     // decrement entered_letters counter
                     game_session->entered_letters--;
                     break;
+                    
                 default:
                     if (isalpha(key_stroke)) { //writing behavior , do whatver with isLetter whether it's a function or it's inside here
                         if (game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') { // if cell at cursor is empty
@@ -129,12 +132,12 @@ void run_session(Game_Session *game_session) { // skeleton made by Anas
                             game_session->history_matrix[game_session->current_attempt][game_session->cursor] = tolower(key_stroke);
 
                             //update UI
-                            /* debug */ mvprintw(game_session->menu_start_row + 2  + game_session->current_attempt * (CELL_HEIGHT + 1),
-                                                 game_session->menu_start_col + 3 + game_session->cursor * (CELL_WIDTH + 2),
-                                                 "%c",
-                                                 toupper(key_stroke)
-                                        );
-                            // print_ascii_letter(); TODO
+                            // /* debug */ mvprintw(game_session->menu_start_row + 2  + game_session->current_attempt * (CELL_HEIGHT + 1),
+                            //                      game_session->menu_start_col + 3 + game_session->cursor * (CELL_WIDTH + 2),
+                            //                      "%c",
+                            //                      toupper(key_stroke)
+                            //             ); // kept for history
+                            print_ascii_letter(game_session, letters_vector, tolower(key_stroke)); // TODO
 
                             // pushing cursor forward if it's not alread at the end
                             if (game_session->cursor != LAST_CELL_INDEX) {
@@ -159,11 +162,11 @@ void run_session(Game_Session *game_session) { // skeleton made by Anas
         // dont forget to increment game_session->current_attempt 
         // dont forget to clear the cursor when the attempt is over
 
-        NEXT_ATTEMPT://go here so we go to next attempt
+        // NEXT_ATTEMPT://go here so we go to next attempt
 
     }
     
-    SESSION_END:
+    // SESSION_END:
     //we either run out of attemps or we won the game
 
 }

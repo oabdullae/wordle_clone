@@ -34,6 +34,16 @@ typedef struct {
     int menu_start_row, menu_start_col; 
 } Game_Session;
 
+typedef struct {
+    char buffer[CELL_HEIGHT][CELL_WIDTH+1]; // +1 for \0
+} Ascii_Art_Letter;
+
+typedef enum {
+    UNIVERS,
+    DOOM,
+    VARSITY
+} Fonts;
+
 typedef enum {
     ROW,
     COL

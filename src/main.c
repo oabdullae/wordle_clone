@@ -42,13 +42,14 @@ typedef struct {
 // int tick = 0;
 
 //MARK: PROTOTYPES
-void run_session(Game_Session *game_session);
+void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]);
 void settings_menu();
 void reset_game_session(Game_Session *game_session, int window_size[2]);
 void exit_prompt();
 int main_menu(int window_size[2]);
 void cell_grid_animation(int top, int left, int bottom, int right, int window_size[2]);
 void init_game_colors();
+void init_ascii_art(Ascii_Art_Letter letters_vector[26]);
 // void *game_timer();
 // void alarm_handler() {
 //     counter++;
@@ -94,6 +95,8 @@ int main(int argc, char** argv) {
     // load last session, idk (or maybe only load it only if continue ? ) 
     
     
+    Ascii_Art_Letter letters_vector[26];
+    init_ascii_art(letters_vector);
     int menu_input = main_menu(window_size);
     int menu_start_col = (window_size[COL] - MENU_WIDTH)/2, menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2; // they start with borders included btw
     Game_Session game_session;
@@ -103,7 +106,7 @@ int main(int argc, char** argv) {
             case NEW_GAME:
                 cell_grid_animation(menu_start_row + 1, menu_start_col + 2, menu_start_row + MENU_HEIGHT-1, menu_start_col + MENU_WIDTH - 3, window_size);
                 reset_game_session(&game_session, window_size); //which will pick new word
-                run_session(&game_session);
+                run_session(&game_session, letters_vector);
                 // start timer, timer is gonna be a new thread that will sleep every second and whenever it wakes up it is gonna increment the time by one second
                 // pthread_t timer_thread;
                 // pthread_create(&timer_thread, NULL, game_timer, NULL);
