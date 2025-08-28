@@ -48,8 +48,6 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
             int key_stroke = getch();
             switch (key_stroke) {
                 case KEY_LEFT:
-                    /* debug */ mvprintw(4, 4, "left arrow pressed");
-                    /* debug */ mvprintw(5, 4, "%d", game_session->cursor);
                     if(game_session->cursor != FIRST_CELL_INDEX) {
                         // update cursor, and its UI cursor position
                         change_cursor(game_session, DELETE_CURSOR);
@@ -60,8 +58,6 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                     break;
                 
                 case KEY_RIGHT:
-                    /* debug */ mvprintw(6, 4, "right arrow pressed");
-                    /* debug */ mvprintw(7, 4, "%d", game_session->cursor);
                     if(game_session->cursor != LAST_CELL_INDEX) {
                         // update cursor, and its UI cursor position
                         change_cursor(game_session,  DELETE_CURSOR);
@@ -124,7 +120,7 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                     // decrement entered_letters counter
                     game_session->entered_letters--;
                     break;
-                    
+
                 default:
                     if (isalpha(key_stroke)) { //writing behavior , do whatver with isLetter whether it's a function or it's inside here
                         if (game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') { // if cell at cursor is empty

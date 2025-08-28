@@ -331,7 +331,7 @@ void init_ascii_art(Ascii_Art_Letter letters_vector[26]) {
             strcpy(letters_vector[24].buffer[0], "   8b        d8   ");
             strcpy(letters_vector[24].buffer[1], "    Y8,    ,8P    ");
             strcpy(letters_vector[24].buffer[2], "     Y8,  ,8P     ");
-            strcpy(letters_vector[24].buffer[3], "      \"8aa 8\"      ");
+            strcpy(letters_vector[24].buffer[3], "      \"8aa 8\"     ");
             strcpy(letters_vector[24].buffer[4], "       `88'       ");
             strcpy(letters_vector[24].buffer[5], "        88        ");
             strcpy(letters_vector[24].buffer[6], "        88        ");
