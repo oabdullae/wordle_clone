@@ -6,6 +6,7 @@
 // #include <time.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <ncurses.h>
 #include "header.h"
 
 #define WORDS_NUMBER 2315
@@ -38,26 +39,29 @@ int pick_random_word(char *buffer) {
     int fd = open("wordle_answers.txt", O_RDONLY);
 
     if (fd == -1) {
-        perror("open");
         curs_set(1);
         endwin();
+        perror("open");
+        fflush(stderr);
         exit(1);
     }
 
     if (lseek(fd, (rand() % WORDS_NUMBER) * 6, SEEK_SET) == -1) {
-        perror("lseek");
         close(fd);
         curs_set(1);
         endwin();
+        perror("lseek");
+        fflush(stderr);
         exit(1);
     }
 
     int bytesRead = read(fd, buffer, WORD_LENGTH);
     if (bytesRead != 5) {
-        perror("read");
         close(fd);
         curs_set(1);
         endwin();
+        perror("read");
+        fflush(stderr);
         exit(1);
     }
 
@@ -114,9 +118,10 @@ bool is_word_english(char* word){
 
     int fd = open("wordle_answers.txt", O_RDONLY);
     if (fd == -1) {
-        perror("Failed to open\n");
         curs_set(1);
         endwin();
+        perror("open");
+        fflush(stderr);
         exit(1);
     }
 
@@ -124,19 +129,21 @@ bool is_word_english(char* word){
         int mid = (low + high) / 2;
 
         if (lseek(fd, mid * (WORD_LENGTH+1), SEEK_SET) == -1) {
-            perror("lseek");
             close(fd);
             curs_set(1);
             endwin();
+            perror("lseek");
+            fflush(stderr);
             exit(1);
         }
 
         int bytesRead = read(fd, buffer, WORD_LENGTH);
         if (bytesRead != WORD_LENGTH) {
-            perror("read");
             close(fd);
             curs_set(1);
             endwin();
+            perror("read");
+            fflush(stderr);
             exit(1);
         }
         buffer[WORD_LENGTH] = '\0'; 

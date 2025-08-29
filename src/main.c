@@ -70,6 +70,7 @@ bool isLetter(int key_stroke);
 int main(int argc, char** argv) {
     // set up ncurses
     initscr(); // init ncurses mode
+    // cbreak(); // disable buffering, still not working yet
     noecho(); // suppresses character printing
     curs_set(0); // to hide the terminal cursor
     keypad(stdscr, TRUE); // to allow arrrow keys and F1-F12 keys
@@ -86,8 +87,8 @@ int main(int argc, char** argv) {
         endwin();
         printf("+======================================+\n");
         printf("|  You need a bigger window to play!!  |\n");
-        printf("|  Needed Rows: %3d, Your Rows: %3d %s |\n", MENU_HEIGHT, window_size[ROW], ((window_size[ROW] < MENU_HEIGHT) ? "<-" : "  "));
-        printf("|  Needed Cols: %3d, Your Cols: %3d %s |\n", MENU_WIDTH, window_size[COL], ((window_size[COL] < MENU_WIDTH) ? "<-" : "  "));
+        printf("|  Needed Rows: %3d %c Your Rows: %3d %s|\n", MENU_HEIGHT, ((MENU_HEIGHT > window_size[ROW]) ? '>' : '<'), window_size[ROW], ((window_size[ROW] < MENU_HEIGHT) ? "<-" : "  "));
+        printf("|  Needed Cols: %3d %c Your Cols: %3d %s|\n", MENU_WIDTH, ((MENU_WIDTH > window_size[COL]) ? '>' : '<'), window_size[COL], ((window_size[COL] < MENU_WIDTH) ? "<-" : "  "));
         printf("|Try maximizing your window or zoom out|\n");
         printf("+======================================+\n");
         return -1;

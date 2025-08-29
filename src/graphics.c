@@ -1,12 +1,24 @@
 #include <ncurses.h>
 #include <string.h>
+#include <unistd.h>
 #include "header.h"
 
 void init_game_colors() {
+    init_pair(NO_COLOR, COLOR_WHITE, COLOR_BLACK);
     init_pair(BLUE, COLOR_BLACK, COLOR_BLUE);
-    init_color(10,53, 255, 53); // green
-    init_color(8, 500, 500, 500); // gray
-    init_color(9, 228, 255, 70); // yellow
+    init_color(GREEN, 53, 255, 53); // green
+    init_pair(GREEN, COLOR_WHITE, GREEN);
+    // init_color(GRAY, 160, 160, 150); // oabdullae's favorite gray 🥹
+    init_color(GRAY, 128, 130, 115); // haytam's gray
+    init_pair(GRAY, COLOR_WHITE, GRAY);
+    init_color(YELLOW, 450, 450, 100); // yellow
+    // init_color(YELLOW, 450, 450, 50); // yellow
+    // init_color(YELLOW, 500, 500, 200); // yellow
+    init_pair(YELLOW, COLOR_WHITE, YELLOW);
+    init_pair(RED, COLOR_WHITE, COLOR_RED);
+
+
+
 }
 
 void change_cursor(Game_Session *game_session, int action) {
@@ -45,44 +57,25 @@ void delete_ascii_letter(Game_Session *game_session) {
     }
 }
 
-/*
-void highlight_letter(Game_Session *game_session, int color, int index, int attempt, int window_size[2]) {
-    int cell_width = 18;
-    int cell_height = 8;
-    int menu_width = 102;
-    int menu_height = 55;
 
-    // Setup color
-    if(color == 8){
-        init_pair(color, COLOR_WHITE, 8);
-    }
-    if(color == 9){
-        init_pair(color, COLOR_WHITE, 9);
-    }
-    if(color == 10){
-        init_pair(color, COLOR_WHITE, 10);
-    }
-
-    // Menu top-left corner
-    int menu_start_col = (window_size[COL] - menu_width) / 2;
-    int menu_start_row = (window_size[ROW] - menu_height) / 2;
+void highlight_letter(Game_Session *game_session, int color, int letter_position) {
 
     // Cell top-left corner (inside grid)
-    int letter_row = menu_start_row + (1 + cell_height) * attempt + 1;
-    int letter_col = menu_start_col + (2 + cell_width) * index + 2;
-    game_session->history_matrix[]
-    
+    int letter_start_col = game_session->menu_start_col+2 + (CELL_WIDTH + 2)*letter_position;
+    int letter_start_row = game_session->menu_start_row+1 + (CELL_HEIGHT + 1)*game_session->current_attempt;
+
     // Loop over the cell area
-    for (int i = 0; i < cell_height; i++) {
-        mvprintw(letter_row + i, letter_col, "HHHHHHHHHHHHHHHHH ");
-        attron(COLOR_PAIR(color));
-        mvprintw(letter_row + i, letter_col, "%s", game_session->history_matrix[letter_row + i][menu_start_row + (1 + CELL_HEIGHT)*attempt ]);//matrix only take letter normal way
-        attroff(COLOR_PAIR(color));
+    attron(COLOR_PAIR(color));
+    for (int i = 0; i < CELL_HEIGHT; ++i) {
+        for (int j = 0; j < CELL_WIDTH; ++j) {
+            char c = mvinch(letter_start_row + i, letter_start_col + j) & A_CHARTEXT;
+            mvaddch(letter_start_row + i, letter_start_col + j, c);
+        }
     }
+    attroff(COLOR_PAIR(color));
 
     refresh();
 }
-*/
 
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]) {
     // switch (letters_vector[0]->font) {

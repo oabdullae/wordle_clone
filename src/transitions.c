@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include "header.h"
 
+void highlight_letter(Game_Session *game_session, int color, int letter_position);
+
 void spiral_clearing_animation(int top, int left, int bottom, int right) {
     // spiral algorithm by Haytam
     int speed = 1200;
@@ -79,7 +81,26 @@ void cell_grid_animation(int top, int left, int bottom, int right, int window_si
             mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3, left + ((right - left)/2 )- (k/2), ' ');
         }
         refresh();
+        flushinp(); // discard queueed input
         usleep(speed);
     }
     attroff(A_STANDOUT);
 }
+
+void invalid_word_warning(Game_Session *game_session) {
+    for (int j = 0; j < 3; ++j) {
+        attron(A_BLINK);
+        for (int i = 0; i < WORD_LENGTH; ++i) {
+            highlight_letter(game_session, RED, i);
+        }
+        attroff(A_BLINK);
+        flushinp();
+        usleep(200000);
+        for (int i = 0; i < WORD_LENGTH; ++i) {
+            highlight_letter(game_session, NO_COLOR, i);
+        }
+        flushinp(); // discard queueed input
+        usleep(200000);
+    }
+}
+

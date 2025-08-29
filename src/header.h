@@ -24,7 +24,7 @@
 
 typedef struct {
     char history_matrix[NO_ATTEMPTS][WORD_LENGTH + 1/* for \0 to use with strcmp*/];
-    char matrix_colors[NO_ATTEMPTS][WORD_LENGTH]; // for storing cell colors
+    int matrix_colors[NO_ATTEMPTS][WORD_LENGTH]; // for storing cell colors
     char wordle_answer[WORD_LENGTH + 1]; // to hold the word to be guessed by the player
     int current_attempt; // range(0,5) 6 attempts, helps determine what row we're at
     int entered_letters; // holds the number of letters entered in an attempt
@@ -57,11 +57,12 @@ typedef enum {
 } menu_options;
 
 typedef enum{
-    NO_COLOR, // undetermined 
+    NO_COLOR = 10, // undetermined 
     GREEN, // letter exists in correct position
     YELLOW, // letter exists in wrong position
     GRAY, // letter does not exist
-    BLUE // cursor color
+    BLUE, // cursor color
+    RED // for invalid word warning
 } Cell_Colors;
 
 typedef enum {
