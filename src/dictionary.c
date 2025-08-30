@@ -9,31 +9,33 @@
 #include <ncurses.h>
 #include "header.h"
 
-#define WORDS_NUMBER 2315
-#define LINE_NUM_B 141
-#define LINE_NUM_C 314
-#define LINE_NUM_D 512
-#define LINE_NUM_E 623
-#define LINE_NUM_F 695
-#define LINE_NUM_G 831
-#define LINE_NUM_H 946
-#define LINE_NUM_I 1015
-#define LINE_NUM_J 1049
-#define LINE_NUM_K 1069
-#define LINE_NUM_L 1089
-#define LINE_NUM_M 1177
-#define LINE_NUM_N 1284
-#define LINE_NUM_O 1321
-#define LINE_NUM_P 1362
-#define LINE_NUM_Q 1504
-#define LINE_NUM_R 1527
-#define LINE_NUM_S 1632
-#define LINE_NUM_T 1998
-#define LINE_NUM_U 2147
-#define LINE_NUM_V 2180
-#define LINE_NUM_W 2223
-#define LINE_NUM_Y 2306
-#define LINE_NUM_Z 2312
+#define NUM_DICT_WORDS 14855
+#define NUM_ANSWER_WORDS  2315
+#define LINE_NUM_B 868
+#define LINE_NUM_C 1871 
+#define LINE_NUM_D 2841 
+#define LINE_NUM_E 3576 
+#define LINE_NUM_F 3906 
+#define LINE_NUM_G 4552 
+#define LINE_NUM_H 5237 
+#define LINE_NUM_I 5769 
+#define LINE_NUM_J 5949 
+#define LINE_NUM_K 6174 
+#define LINE_NUM_L 6603 
+#define LINE_NUM_M 7228 
+#define LINE_NUM_N 8179 
+#define LINE_NUM_O 8647 
+#define LINE_NUM_P 8999 
+#define LINE_NUM_Q 10129 
+#define LINE_NUM_R 10232 
+#define LINE_NUM_S 11027 
+#define LINE_NUM_T 12693 
+#define LINE_NUM_U 13575 
+#define LINE_NUM_V 13792 
+#define LINE_NUM_W 14076 
+#define LINE_NUM_X 14510 
+#define LINE_NUM_Y 14528 
+#define LINE_NUM_Z 14733 
 
 int pick_random_word(char *buffer) {
     int fd = open("wordle_answers.txt", O_RDONLY);
@@ -46,7 +48,7 @@ int pick_random_word(char *buffer) {
         exit(1);
     }
 
-    if (lseek(fd, (rand() % WORDS_NUMBER) * 6, SEEK_SET) == -1) {
+    if (lseek(fd, (rand() % NUM_ANSWER_WORDS) * 6, SEEK_SET) == -1) {
         close(fd);
         curs_set(1);
         endwin();
@@ -71,7 +73,7 @@ int pick_random_word(char *buffer) {
 }
 
 bool is_word_english(char* word){
-    int start_line = 0, end_line = WORDS_NUMBER-1;
+    int start_line = 0, end_line = NUM_DICT_WORDS-1;
 
     for (int i = 0; i < 5; i++)
         word[i] = tolower((unsigned char)word[i]);
@@ -108,7 +110,7 @@ bool is_word_english(char* word){
         case 'w': start_line = LINE_NUM_W; end_line = LINE_NUM_Y-1; break;
         case 'x': return false;
         case 'y': start_line = LINE_NUM_Y; end_line = LINE_NUM_Z-1; break;
-        case 'z': start_line = LINE_NUM_Z; end_line = WORDS_NUMBER-1; break;
+        case 'z': start_line = LINE_NUM_Z; end_line = NUM_DICT_WORDS-1; break;
         default: start_line = 0; end_line = LINE_NUM_B-1;
     }
 
