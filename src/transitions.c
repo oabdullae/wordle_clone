@@ -88,7 +88,7 @@ void cell_grid_animation(int top, int left, int bottom, int right, int window_si
 }
 
 void invalid_word_warning(Game_Session *game_session) {
-    for (int j = 0; j < 3; ++j) {
+    for (int j = 0; j < 2; ++j) {
         attron(A_BLINK);
         for (int i = 0; i < WORD_LENGTH; ++i) {
             highlight_letter(game_session, RED, i);

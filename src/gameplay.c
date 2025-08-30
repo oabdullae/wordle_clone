@@ -15,7 +15,7 @@ void invalid_word_warning(Game_Session *game_session);
 // void move_cursor(Game_Session *game_session, int attempt, int old_cursor, int new_cursor);
 
 void reset_game_session(Game_Session *game_session, int window_size[2]) {
-    for (int i = 0; i < NO_ATTEMPTS; ++i) { // 6 attempts
+    for (int i = 0; i < NUM_ATTEMPTS; ++i) { // 6 attempts
         for (int j = 0; j < WORD_LENGTH; ++j) { // 5 characters 
             game_session->history_matrix[i][j] = ' ';
             game_session->matrix_colors[i][j] = NO_COLOR;
@@ -30,17 +30,17 @@ void reset_game_session(Game_Session *game_session, int window_size[2]) {
     game_session->menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2;
     game_session->menu_start_col = (window_size[COL] - MENU_WIDTH)/2;
     pick_random_word(game_session->wordle_answer);
-    // strcpy(game_session->wordle_answer, "greed");
+    // strcpy(game_session->wordle_answer, "thumb");
     /* temporary debug */mvprintw(0, 0, "randomly picked word: %s", game_session->wordle_answer);
 }
 
 void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]) { // skeleton made by Anas
-    char wordle_guess[6] = {"     "}; //spaces means empty
+    // char wordle_guess[6] = {"     "}; //spaces means empty
     int key_stroke/* , number_of_entered_letters = 0 */;//rename to something less verbose
     //works with a game session that already exists
     //display UI;
     // /* debug */int index = 2;
-    while (game_session->current_attempt < NO_ATTEMPTS) { // session loop consisting of at most 6 attempts
+    while (game_session->current_attempt < NUM_ATTEMPTS) { // session loop consisting of at most 6 attempts
         //either display cursor at (game_session.cursor[X],game_session.cursor[Y])
         //set it to the start of the line 
         game_session->cursor = 0;
@@ -76,8 +76,9 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                     break;
 
                 case '\n':
+                
                     if (game_session->entered_letters < 5) {
-                        // display too short 
+                        // display too short
                     }
                     else {
                         if (strcmp(game_session->wordle_answer, game_session->history_matrix[game_session->current_attempt]) == 0) {
@@ -85,43 +86,84 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                             for (int i = 0; i < WORD_LENGTH; ++i) {
                                 highlight_letter(game_session, GREEN, i);
                             }
-
+                            
                             //you win update ui
-                            // goto SESSION_END;
+                            // goto SESSION_END; // just make current_attempt = 6 to exit loop
+                            game_session->current_attempt = 6;
+                            is_valid_word = true;
+                            refresh();
+                            usleep(2000000);
                         }
                         else if (is_word_english(game_session->history_matrix[game_session->current_attempt])) {
                             is_valid_word = true;
                             //update the UI aka
                             //color the letters apporpriately
-                            for (int i = 0; i < WORD_LENGTH; ++i) {
+                            // colored_letters to hold the colored letters in the wordle answer
+                            char colored_letters[5] = {' ', ' ', ' ', ' ', ' '}; // ' ' for uncolored, 'G' for green, 'Y' for yellow (we dont care about gray)
+                            // we go green all correct letters in their positions first
+                            for (int i = 0; i < WORD_LENGTH; ++i) { // to solve CANAL with CENAL
                                 // check if the letter is in its position, if yes: green it and mark it already greened, and quit
                                 if (game_session->history_matrix[game_session->current_attempt][i] == game_session->wordle_answer[i]) {
                                     // color green
                                     highlight_letter(game_session, GREEN, i);
-                                    // save for loading, and also serves as marking green for this algorithm
+                                    // marking green for this algorithm to work properly
+                                    colored_letters[i] = 'G';
+                                    // save for loading
                                     game_session->matrix_colors[game_session->current_attempt][i] = GREEN;
                                 }
+                            }
+                            for (int i = 0; i < WORD_LENGTH; ++i) {
+                                if (game_session->matrix_colors[game_session->current_attempt][i] == GREEN) // no need to check greened letters, just skip by continue;
+                                    continue;
                                 
-                                // if no, check all other letters that are not greened yet, if found color yellow and quit
-                                else {
-                                    for (int j = 0; j < WORD_LENGTH; ++j) {
-                                        if (i != j && game_session->matrix_colors[game_session->current_attempt][j] != GREEN) {
-                                            if (game_session->history_matrix[game_session->current_attempt][i] == game_session->wordle_answer[j]) {
-                                                // color yellow
-                                                highlight_letter(game_session, YELLOW, i);
-                                                game_session->matrix_colors[game_session->current_attempt][i] = YELLOW;
-                                                break;
+                                // when not green , check all other letters that are not greened yet, if found color yellow and quit
+                                for (int j = 0; j < WORD_LENGTH; ++j) {
+                                    if (/* i != j && */
+                                        colored_letters[j] != 'G' && /* solves THUMB with TOAST */
+                                        colored_letters[j] != 'Y' /* solves LOGIN with HELLO and ALPHA with CANAL with the help of colored_letters[] */
+                                    ) { // only search among letters that are uncolored, and of course skip the cas i==j, cuz we already checked that just above
+                                        if (game_session->history_matrix[game_session->current_attempt][i] == game_session->wordle_answer[j]) {
+                                            // color yellow
+                                            highlight_letter(game_session, YELLOW, i);
+                                            game_session->matrix_colors[game_session->current_attempt][i] = YELLOW;
+                                            colored_letters[j] = 'Y'; // mark the letter yellowed for the algorithm to work properly
+                                            break;
+                                            
+                                        }
+                                    }
+                                }
+                                
+                                
+                                        /* old attempt, that can't yellow two repeated letters, it only yellows one (like in solution:LLAMA with guess:STALL)
+
+                                        if (i != j && game_session->matrix_colors[game_session->current_attempt][j] != GREEN) { // i!=j cuz we already compared that before in trying to green it, 
+                                                                                                                                // and the 2nd condition for comparing only with indices that are not greened yet, try THUMB as solution and TOAST as guess without skipping greened ones
+                                            if (game_session->history_matrix[game_session->current_attempt][i] == game_session->wordle_answer[j]) { // compare if letter exists in the answer under the above conditions
+                                                // here letter is found in answer, but before yellowing it we still need to 
+                                                // check if letter was already yellowed, cuz if that was the case it should not be yellowed
+                                                bool similar_yellowed_letter = false;
+                                                for (int k = i - 1; k >= 0; --k) {
+                                                    if (game_session->history_matrix[game_session->current_attempt][i] == game_session->history_matrix[game_session->current_attempt][k] && game_session->matrix_colors[game_session->current_attempt][k] == YELLOW) {
+                                                        similar_yellowed_letter = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (similar_yellowed_letter == false) { // only yellow it if it was not already yellowed
+                                                    // color yellow
+                                                    highlight_letter(game_session, YELLOW, i);
+                                                    game_session->matrix_colors[game_session->current_attempt][i] = YELLOW;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
-                                    if (game_session->matrix_colors[game_session->current_attempt][i] != YELLOW) { // if letter was not yellowed, gray it
-                                        // color in gray
-                                        highlight_letter(game_session, GRAY, i);
-                                        game_session->matrix_colors[game_session->current_attempt][i] = GRAY;
-                                    }
+                                    */
+                                // if no then gray it, this way no greened letter will appear yellow (e.g. if answer was THUMB, and guess was TOAST, only first T should be greened, and second T should not be yellowed)
+                                if (game_session->matrix_colors[game_session->current_attempt][i] != YELLOW) { // if letter was not yellowed, gray it
+                                    // color in gray
+                                    highlight_letter(game_session, GRAY, i);
+                                    game_session->matrix_colors[game_session->current_attempt][i] = GRAY;
                                 }
-
-                                // if no gray it, this way no greened letter will appear yellow (e.g. if answer was THUMB, and guess was TOAST, only first T should be greened, and second T should not be yellowed)
                             }
 
                             /* OLD BUGGY ATTEMPT, but good trial that helped develop the above algorithm
@@ -173,6 +215,7 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                             // increment current_attempt for next attempt (if there is one)
                             game_session->current_attempt += DOWN; // also moves cursor down
                             game_session->cursor = FIRST_CELL_INDEX; // move cursor to the start
+                            game_session->entered_letters = 0; // reset entered_letters counter back to 0
 
                             
                             //NOTE: DO NOT display position, because it will show outside

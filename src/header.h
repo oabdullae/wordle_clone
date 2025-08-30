@@ -8,7 +8,7 @@
 #define CELL_HEIGHT   8 // borders excluded
 
 #define WORD_LENGTH 5
-#define NO_ATTEMPTS 6
+#define NUM_ATTEMPTS 6
 
 //cursor edges | borders?
 #define FIRST_CELL_INDEX 0
@@ -23,8 +23,8 @@
 # include <stdbool.h>
 
 typedef struct {
-    char history_matrix[NO_ATTEMPTS][WORD_LENGTH + 1/* for \0 to use with strcmp*/];
-    int matrix_colors[NO_ATTEMPTS][WORD_LENGTH]; // for storing cell colors
+    char history_matrix[NUM_ATTEMPTS][WORD_LENGTH + 1/* for \0 to use with strcmp*/];
+    int matrix_colors[NUM_ATTEMPTS][WORD_LENGTH]; // for storing cell colors
     char wordle_answer[WORD_LENGTH + 1]; // to hold the word to be guessed by the player
     int current_attempt; // range(0,5) 6 attempts, helps determine what row we're at
     int entered_letters; // holds the number of letters entered in an attempt
