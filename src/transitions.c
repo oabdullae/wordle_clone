@@ -104,3 +104,21 @@ void invalid_word_warning(Game_Session *game_session) {
     }
 }
 
+void too_short_warning(Game_Session *game_session) {
+    for (int j = 0; j < 2; ++j) {
+        attron(A_BLINK);
+        for (int i = 0; i < WORD_LENGTH; ++i) {
+            if (game_session->history_matrix[game_session->current_attempt][i] == ' ') // only flash empty cells
+                highlight_letter(game_session, RED, i);
+        }
+        attroff(A_BLINK);
+        flushinp();
+        usleep(200000);
+        for (int i = 0; i < WORD_LENGTH; ++i) {
+            if (game_session->history_matrix[game_session->current_attempt][i] == ' ') // only unflash empty cells
+                highlight_letter(game_session, NO_COLOR, i);
+        }
+        flushinp(); // discard queueed input
+        usleep(200000);
+    }
+}

@@ -12,6 +12,7 @@ void delete_ascii_letter(Game_Session *game_session);
 bool is_word_english(char* word);
 void highlight_letter(Game_Session *game_session, int color, int letter_position);
 void invalid_word_warning(Game_Session *game_session);
+void too_short_warning(Game_Session *game_session);
 // void move_cursor(Game_Session *game_session, int attempt, int old_cursor, int new_cursor);
 
 void reset_game_session(Game_Session *game_session, int window_size[2]) {
@@ -79,6 +80,7 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                 
                     if (game_session->entered_letters < 5) {
                         // display too short
+                        too_short_warning(game_session);
                     }
                     else {
                         if (strcmp(game_session->wordle_answer, game_session->history_matrix[game_session->current_attempt]) == 0) {
