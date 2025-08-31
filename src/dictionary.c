@@ -118,7 +118,7 @@ bool is_word_english(char* word){
     int low = start_line;
     int high = end_line; 
 
-    int fd = open("wordle_answers.txt", O_RDONLY);
+    int fd = open("wordle_dictionary.txt", O_RDONLY);
     if (fd == -1) {
         curs_set(1);
         endwin();
