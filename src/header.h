@@ -26,9 +26,9 @@ typedef struct {
     char history_matrix[NUM_ATTEMPTS][WORD_LENGTH + 1/* for \0 to use with strcmp*/];
     int matrix_colors[NUM_ATTEMPTS][WORD_LENGTH]; // for storing cell colors
     char wordle_answer[WORD_LENGTH + 1]; // to hold the word to be guessed by the player
-    int current_attempt; // range(0,5) 6 attempts, helps determine what row we're at
+    int current_attempt; // range(0,NUM_ATTEMPTS - 1) NUM_ATTEMPTS attempts, helps determine what row we're at
     int entered_letters; // holds the number of letters entered in an attempt
-    int cursor; // to point to a cell in a given attempt, range(0,4)
+    int cursor; // to point to a cell in a given attempt, range(0,WORD_LENGTH - 1)
     int time_elapsed; // to store how much time the player took so far
     bool game_ended;
     int menu_start_row, menu_start_col; 

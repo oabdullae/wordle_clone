@@ -4,49 +4,58 @@
 
 void highlight_letter(Game_Session *game_session, int color, int letter_position);
 
-void spiral_clearing_animation(int top, int left, int bottom, int right) {
+void spiral_clearing_animation(int menu_start_col, int menu_start_row) {
+    if(menu_start_row == 0 || menu_start_col == 0) return;
+    int top_row, right_col, bottom_row, left_col;
+    //initialisation
+    //int top           , int left          , int bottom                    , int right)
+    //menu_start_row + 1, menu_start_col + 2, menu_start_row + MENU_HEIGHT-2, menu_start_col + MENU_WIDTH - 3
+    top_row = menu_start_row + 1;//skip the top border
+    left_col = menu_start_col + 2;//skip the left col border
+    bottom_row = menu_start_row + MENU_HEIGHT - 2;//goes back before bottom row, because menuStart + menu height - 1 is last row, so -1 to go back 1 more time
+    right_col = menu_start_col + MENU_WIDTH - 3;//goes back by 3, because menuStart + MENU_WIDTH - 1 is right col edge, so go back by 2 characters because right col is 2 characters thick
     // spiral algorithm by Haytam
     int speed = 1200;
-    while (top <= bottom && left <= right) {
-        // top 5 rows
-        for (int i = left; i <= right; i++) {
+    while (top_row <= bottom_row && left_col <= right_col) {
+        // top_row 5 rows
+        for (int i = left_col; i <= right_col; i++) {
             for (int j = 0; j < 5; ++j)
-                mvaddch(top + j, i, ' ');
+                mvaddch(top_row + j, i, ' ');
             refresh();
             usleep(speed);
         }
-        top += 5;
+        top_row += 5;
 
-        // right 10 columns
-        for (int i = top; i <= bottom; i++) {
+        // right_col 10 columns
+        for (int i = top_row; i <= bottom_row; i++) {
             for (int j = 0; j < 10; ++j)
-                mvaddch(i, right - j, ' ');
+                mvaddch(i, right_col - j, ' ');
 
             refresh();
             usleep(speed);
         }
-        right -= 10;
+        right_col -= 10;
 
-        // bottom  5 rows
-        if (top <= bottom) {
-            for (int i = right; i >= left; i--) {
+        // bottom_row  5 rows
+        if (top_row <= bottom_row) {
+            for (int i = right_col; i >= left_col; i--) {
                 for (int j = 0; j < 5; ++j)
-                    mvaddch(bottom - j, i, ' ');
+                    mvaddch(bottom_row - j, i, ' ');
                 refresh();
                 usleep(speed);
             }
-            bottom -= 5;
+            bottom_row -= 5;
         }
 
-        // left 10 columns
-        if (left <= right) {
-            for (int i = bottom; i >= top; i--) {
+        // left_col 10 columns
+        if (left_col <= right_col) {
+            for (int i = bottom_row; i >= top_row; i--) {
                 for (int j = 0; j < 10; ++j)
-                    mvaddch(i, left + j, ' ');
+                    mvaddch(i, left_col + j, ' ');
                 refresh();
                 usleep(speed);
             }
-            left += 10;
+            left_col += 10;
         }
     }
 }

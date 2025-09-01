@@ -101,6 +101,7 @@ int main(int argc, char** argv) {
     int menu_input = main_menu(window_size);
     int menu_start_col = (window_size[COL] - MENU_WIDTH)/2, menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2; // they start with borders included btw
     Game_Session game_session;
+    //
     // MAIN_MENU:
     do {
         switch(menu_input) {
