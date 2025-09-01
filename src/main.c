@@ -47,7 +47,7 @@ void settings_menu();
 void reset_game_session(Game_Session *game_session, int window_size[2]);
 void exit_prompt();
 int main_menu(int window_size[2]);
-void cell_grid_animation(int top, int left, int bottom, int right, int window_size[2]);
+void cell_grid_animation(int menu_start_row, int menu_start_col);
 void init_game_colors();
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]);
 // void *game_timer();
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
     do {
         switch(menu_input) {
             case NEW_GAME:
-                cell_grid_animation(menu_start_row + 1, menu_start_col + 2, menu_start_row + MENU_HEIGHT-1, menu_start_col + MENU_WIDTH - 3, window_size);
+                cell_grid_animation(menu_start_row, menu_start_col);
                 reset_game_session(&game_session, window_size); //which will pick new word
                 run_session(&game_session, letters_vector);
                 // start timer, timer is gonna be a new thread that will sleep every second and whenever it wakes up it is gonna increment the time by one second
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
                 break;
 
             case CONTINUE:
-                cell_grid_animation(menu_start_row + 1, menu_start_col + 2, menu_start_row + MENU_HEIGHT-1, menu_start_col + MENU_WIDTH - 3, window_size);
+                cell_grid_animation(menu_start_row, menu_start_col);
                 getch();
                 //continue session without change
                 // load_previous_session();
