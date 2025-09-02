@@ -18,7 +18,6 @@ void init_game_colors() {
     init_pair(RED, COLOR_WHITE, COLOR_RED);
 
 
-
 }
 
 void change_cursor(Game_Session *game_session, int action) {
@@ -76,6 +75,46 @@ void highlight_letter(Game_Session *game_session, int color, int letter_position
 
     refresh();
 }
+
+void restore_after_pause(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]) {
+    // wiping the area used by the esc menu
+    for (int i = 0; i < CELL_HEIGHT*2 + 1; ++i) {
+        for (int j = 0; j < MENU_WIDTH - 4; ++j) {
+            mvaddch(game_session->menu_start_row+1 + (CELL_HEIGHT + 1) * 2 + i, game_session->menu_start_col + 2 + j, ' ');
+        }
+    }
+
+    // restoring cursor
+    change_cursor(game_session, PRINT_CURSOR);
+
+    // redrawing borders
+    attron(A_STANDOUT);
+    for (int i = 0; i < MENU_WIDTH-4; ++i) {
+        mvaddch(game_session->menu_start_row + (CELL_HEIGHT + 1) * 3, game_session->menu_start_col+2+i, ' ');
+    }
+    for (int i = 0; i < 4; ++i) { // reprint 4 vertical internal borders
+        for (int j = 0; j < CELL_HEIGHT*2 + 1; ++j) { // 2 cell heights + 1 row-border
+            mvprintw(game_session->menu_start_row+1 + (CELL_HEIGHT + 1) * 2 + j, game_session->menu_start_col + (CELL_WIDTH + 2) * (i + 1), "  ");
+        }
+    }
+    attroff(A_STANDOUT);
+    // reprinting all letters with their colors
+    char revived_letter;
+    for (int i = 0; i < 2; ++i) { // loop over 2 rows
+        for (int j = 0; j < WORD_LENGTH; ++j) { // loop over 5 letters in every row
+            attron(COLOR_PAIR(game_session->matrix_colors[2+i][j]));
+            for (int k = 0; k < CELL_HEIGHT; ++k) {
+                revived_letter = game_session->history_matrix[2+i][j];
+                mvprintw(game_session->menu_start_row+1  + (2 + i) *(CELL_HEIGHT + 1) + k,
+                        game_session->menu_start_col+2 + j*(CELL_WIDTH + 2),
+                        "%s", letters_vector[revived_letter - 'a'].buffer[k]
+                        );
+            }
+            attroff(COLOR_PAIR(game_session->matrix_colors[2+i][j]));
+        }
+    }
+}
+
 
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]) {
     // switch (letters_vector[0]->font) {

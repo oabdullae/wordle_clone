@@ -19,6 +19,7 @@
 #define LEFT -1
 #define DOWN 1
 
+#define ESCAPE_KEY 27 // ascii value for esc key
 
 # include <stdbool.h>
 
@@ -69,5 +70,17 @@ typedef enum {
     DELETE_CURSOR, // to tell src/graphics.c:change_cursor() to delete the cursor
     PRINT_CURSOR // to tell it to print the cursor
 } Cursor_Actions;
+
+typedef enum {
+    SAVE_AND_QUIT,
+    RESUME_GAME,
+    MAIN_MENU
+} Esc_Menu_Options;
+
+typedef enum { // for return values of run_session()
+    WON,
+    LOST,
+    BACK
+} Session_Results;
 
 #endif

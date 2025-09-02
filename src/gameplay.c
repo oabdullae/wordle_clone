@@ -4,7 +4,11 @@
 #include <ctype.h>
 #include <string.h>
 #include "header.h"
+#include <stdlib.h>
 
+void spiral_clearing_animation(int menu_start_row, int menu_start_col);
+int escape_menu(Game_Session* game_session);
+void save_session(Game_Session *gamesession);
 int pick_random_word(char *buffer);
 void change_cursor(Game_Session *game_session, int action);
 void print_ascii_letter(Game_Session *game_session, Ascii_Art_Letter letters_vector[26], char letter);
@@ -13,6 +17,7 @@ bool is_word_english(char* word);
 void highlight_letter(Game_Session *game_session, int color, int letter_position);
 void invalid_word_warning(Game_Session *game_session);
 void too_short_warning(Game_Session *game_session);
+void restore_after_pause(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]);
 // void move_cursor(Game_Session *game_session, int attempt, int old_cursor, int new_cursor);
 
 void reset_game_session(Game_Session *game_session, int window_size[2]) {
@@ -171,7 +176,6 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                             /* OLD BUGGY ATTEMPT, but good trial that helped develop the above algorithm
                             for (int i = 0; i < WORD_LENGTH; ++i) {
                                 // solve here;
-                                // MARK: DO STRCHR BEHAVIOR MANUALLY 
                                 char *ptr_found_letter = strchr(game_session->wordle_answer, game_session->history_matrix[game_session->current_attempt][i]);
                                 if (ptr_found_letter == NULL) { // letter not found
                                     // color in gray
@@ -259,6 +263,42 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                         game_session->entered_letters--;
                     break;
 
+                
+
+                case ESCAPE_KEY: // Escape key
+                    // reask the player if he wanna quit to menu or to stop game or continue
+                    // scr_dump("screen_save.scr");
+                    int action = escape_menu(game_session);
+                    
+                    if (action == RESUME_GAME) {
+                        // resume
+                        // scr_restore("screen_save.scr"); // should restore the cursor as well
+                        // refresh();
+
+                        // restoring manually
+                        restore_after_pause(game_session, letters_vector);
+                        break;
+                    }
+                    else { // MAIN_MENU and SAVE_QUIT
+                        save_session(game_session);
+                        if (action == MAIN_MENU) {
+                            //go back to menu 
+                            spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
+                            
+                            // break out of both loops by breaking their conditions
+                            is_valid_word = true;
+                            game_session->current_attempt = NUM_ATTEMPTS;
+                            break;
+                        }
+                        else { // SAVE_QUIT option quit the game 
+                            spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
+                            curs_set(1); // to set back the terminal cursor
+                            endwin();
+                            exit(0);
+                        }
+                    }
+                    
+                    break;
                 default:
                     if (isalpha(key_stroke)) { //writing behavior , do whatver with isLetter whether it's a function or it's inside here
                         if (game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') { // if cell at cursor is empty
