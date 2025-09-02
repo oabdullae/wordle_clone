@@ -4,81 +4,94 @@
 
 void highlight_letter(Game_Session *game_session, int color, int letter_position);
 
-void spiral_clearing_animation(int top, int left, int bottom, int right) {
+void spiral_clearing_animation(int menu_start_row, int menu_start_col) {
     // spiral algorithm by Haytam
+    
+    if(menu_start_row == 0 || menu_start_col == 0) return;
+    int top_row = menu_start_row + 1;
+    int bottom_row = menu_start_row + MENU_HEIGHT - 2;
+    int left_col = menu_start_col + 2;
+    int right_col = menu_start_col + MENU_WIDTH - 3;
     int speed = 1200;
-    while (top <= bottom && left <= right) {
-        // top 5 rows
-        for (int i = left; i <= right; i++) {
+    
+    while (top_row <= bottom_row && left_col <= right_col) {
+        // top_row 5 rows
+        for (int i = left_col; i <= right_col; i++) {
             for (int j = 0; j < 5; ++j)
-                mvaddch(top + j, i, ' ');
+                mvaddch(top_row + j, i, ' ');
             refresh();
             usleep(speed);
         }
-        top += 5;
+        top_row += 5;
 
-        // right 10 columns
-        for (int i = top; i <= bottom; i++) {
+        // right_col 10 columns
+        for (int i = top_row; i <= bottom_row; i++) {
             for (int j = 0; j < 10; ++j)
-                mvaddch(i, right - j, ' ');
+                mvaddch(i, right_col - j, ' ');
 
             refresh();
             usleep(speed);
         }
-        right -= 10;
+        right_col -= 10;
 
-        // bottom  5 rows
-        if (top <= bottom) {
-            for (int i = right; i >= left; i--) {
+        // bottom_row  5 rows
+        if (top_row <= bottom_row) {
+            for (int i = right_col; i >= left_col; i--) {
                 for (int j = 0; j < 5; ++j)
-                    mvaddch(bottom - j, i, ' ');
+                    mvaddch(bottom_row - j, i, ' ');
                 refresh();
                 usleep(speed);
             }
-            bottom -= 5;
+            bottom_row -= 5;
         }
 
-        // left 10 columns
-        if (left <= right) {
-            for (int i = bottom; i >= top; i--) {
+        // left_col 10 columns
+        if (left_col <= right_col) {
+            for (int i = bottom_row; i >= top_row; i--) {
                 for (int j = 0; j < 10; ++j)
-                    mvaddch(i, left + j, ' ');
+                    mvaddch(i, left_col + j, ' ');
                 refresh();
                 usleep(speed);
             }
-            left += 10;
+            left_col += 10;
         }
     }
 }
 
-void cell_grid_animation(int top, int left, int bottom, int right, int window_size[2]) {
+void cell_grid_animation(int menu_start_row, int menu_start_col) {
+
     int speed = 10000;
-    int menu_start_col = (window_size[COL] - MENU_WIDTH)/2;
-    int menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2; // they start with borders included btw
+    int top_row, bottom_row, left_col, right_col;
+    top_row= menu_start_row + 1;
+    left_col = menu_start_col + 2;
+    bottom_row = menu_start_row + MENU_HEIGHT - 2;
+    right_col = menu_start_col + MENU_WIDTH - 3;
+
+
     attron(A_STANDOUT);
-    for (int i = top, k = 0; k < MENU_WIDTH-2 || i <= bottom ; i++, k++) {
-        if (i <= bottom) {
-            // the 2 left internal border-columns of the grid get drawn from top to bottom
+    for (int i = top_row, k = 0; k < MENU_WIDTH-2 || i <= bottom_row ; i++, k++) {
+        if (i <= bottom_row) {
+            // the 2 left_col internal border-columns of the grid get drawn from top_row to bottom_row
             mvprintw(i, menu_start_col + (2 + CELL_WIDTH)*1, "  "); // the added 2 is the size of the column-border
             mvprintw(i, menu_start_col + (2 + CELL_WIDTH)*2, "  ");
             
-            // the 2 right internal border-colums of the grid get drawn from bottom to top
-            mvprintw(bottom - k, menu_start_col + (2 + CELL_WIDTH)*3, "  ");
-            mvprintw(bottom - k, menu_start_col + (2 + CELL_WIDTH)*4, "  ");
+            // the 2 right_col internal border-colums of the grid get drawn from bottom_row to top_row
+            mvprintw(bottom_row - k, menu_start_col + (2 + CELL_WIDTH)*3, "  ");
+            mvprintw(bottom_row - k, menu_start_col + (2 + CELL_WIDTH)*4, "  ");
         }
 
         if (k < MENU_WIDTH-2) {
-            // the 2 top internal border-rows of the grid get drawn from left to right
-            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*1 , left + k, ' '); // the added 1 is the size of the row-border
-            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*2 , left + k , ' ');
+            // the 2 top_row internal border-rows of the grid get drawn from left_col to right_col
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*1 , left_col + k, ' '); // the added 1 is the size of the row-border
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*2 , left_col + k , ' ');
 
-            // the 2 bottom internal border-rows of the grid get drawn from right to left
-            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*4, right - k, ' ');
-            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*5, right - k, ' ');
+            // the 2 bottom_row internal border-rows of the grid get drawn from right_col to left_col
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*4, right_col - k, ' ');
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*5, right_col - k, ' ');
             
             //the midlle internal border-row of the grid gets drwan from the middle to the sides
-            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3, left + ((right - left)/2) + (k/2), ' '); // right - left is just the width
-            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3, left + ((right - left)/2 )- (k/2), ' ');
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3, left_col + ((right_col - left_col)/2) + (k/2), ' '); // right_col - left_col is just the width
+            mvaddch(menu_start_row + (1 + CELL_HEIGHT)*3, left_col + ((right_col - left_col)/2 )- (k/2), ' ');
         }
         refresh();
         flushinp(); // discard queueed input

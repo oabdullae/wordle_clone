@@ -1,7 +1,7 @@
 #include <ncurses.h>
 #include "header.h"
 
-void spiral_clearing_animation(int top, int left, int bottom, int right);
+void spiral_clearing_animation(int menu_start_row, int menu_start_col);
 
 int main_menu(int window_size[2]) {
     int menu_start_col = (window_size[COL] - MENU_WIDTH)/2, menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2; // they start with borders included btw
@@ -113,7 +113,7 @@ int main_menu(int window_size[2]) {
                 break;
             case '\n':
                 // main menu will fade with a beautiful spiral animation by Haytam
-                spiral_clearing_animation(menu_start_row + 1, menu_start_col + 2, menu_start_row + MENU_HEIGHT-2, menu_start_col + MENU_WIDTH - 3);
+                spiral_clearing_animation(menu_start_row, menu_start_col);
                 return menu_choice;
             // default: just ignore it and loop back
         }
