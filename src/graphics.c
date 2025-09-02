@@ -77,6 +77,122 @@ void highlight_letter(Game_Session *game_session, int color, int letter_position
     refresh();
 }
 
+
+int wanna_quit(Game_Session* game_session) {
+    scr_dump("screen_save.scr");
+
+    int start_y = 24, end_y = 41;
+    int start_x = 69, end_x = 167;
+    int width   = end_x - start_x;
+
+    const char *top_ascii[] = {
+        " __    _  _  __ __       _     _  _ ______ _    ",
+        "/  |_|/ \\/ \\(_ |_    | ||_)   / \\|_) |  | / \\|\\|",
+        "\\__| |\\_/\\_/__)|__   |_|| \\   \\_/|   | _|_\\_/| |"
+    };
+
+    const char *menu_ascii[] = {
+        "   _    ______           __            _  __ __       _",
+        "  / \\| | |  |        |V||_ |\\|| |     |_)|_ (_ | ||V||_",
+        "  \\_X|_|_|_ |        | ||__| ||_|     | \\|____)|_|| ||_"
+    };
+    
+    // Define the horizontal positions for each option in the ASCII art
+    typedef struct {
+        int start;
+        int end;
+    } OptionPosition;
+    
+    OptionPosition quit_positions[] = {
+        {2, 14},    // "   _ " on line 0
+        {2, 14},    // "  / \\" on line 1  
+        {2, 14}     // "  \\_X" on line 2
+    };
+    
+    OptionPosition menu_positions[] = {
+        {21, 34},   
+        {21, 34},  
+        {21, 34}    
+    };
+    
+    OptionPosition resume_positions[] = {
+        {38, 55},  
+        {38, 55},  
+        {38, 55}   
+    };
+
+    int top_lines  = 3, menu_lines = 3;
+    int top_width  = (int)strlen(top_ascii[0]);
+    int menu_width = (int)strlen(menu_ascii[0]);
+
+    int top_row  = start_y + 1;
+    int top_col  = start_x + (width - top_width) / 2;
+    int menu_row = start_y + 10;
+    int menu_col = start_x + (width - menu_width) / 2;
+
+    int selected = 0; // 0=Quit, 1=Menu, 2=Resume
+
+
+    // Draw background
+    attron(COLOR_PAIR(GRAY));
+    for (int y = start_y; y < end_y; y++)
+        for (int x = start_x; x < end_x; x++)
+            mvaddch(y, x, ' ');
+    attroff(COLOR_PAIR(GRAY));
+
+    int ch;
+    while (1) {
+        // Draw title
+        attron(COLOR_PAIR(GRAY));
+        for (int i = 0; i < top_lines; i++) {
+            mvprintw(top_row + i, top_col, "%s", top_ascii[i]);
+        }
+        attroff(COLOR_PAIR(GRAY));
+
+        // Draw menu ASCII art (base text)
+        attron(COLOR_PAIR(GRAY));
+        for (int i = 0; i < menu_lines; i++) {
+            mvprintw(menu_row + i, menu_col, "%s", menu_ascii[i]);
+        }
+        attroff(COLOR_PAIR(GRAY));
+
+        // Highlight the selected option
+        OptionPosition *positions;
+        if (selected == 0) positions = quit_positions;
+        else if (selected == 1) positions = menu_positions;
+        else positions = resume_positions;
+        
+        for (int i = 0; i < menu_lines; i++) {
+            int start = positions[i].start;
+            int end = positions[i].end;
+            int len = end - start;
+            
+            // Move to the position and highlight
+            move(menu_row + i, menu_col + start);
+            attron(COLOR_PAIR(10) | A_BOLD); // Use the highlight color pair
+            for (int j = 0; j < len; j++) {
+                addch(menu_ascii[i][start + j]);
+            }
+            attroff(COLOR_PAIR(10) | A_BOLD);
+        }
+
+        refresh();
+
+        ch = getch();
+        if (ch == KEY_LEFT) {
+            selected = (selected - 1 + 3) % 3;
+        } else if (ch == KEY_RIGHT) {
+            selected = (selected + 1) % 3;
+        } else if (ch == '\n' || ch == KEY_ENTER) {
+            if(selected != 1)scr_restore("screen_save.scr");
+            if (selected == 0) return 1;    // Quit
+            else if (selected == 1) return 2; // Menu
+            else return 0;                  // Resume
+        }
+    }
+}
+
+
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]) {
     // switch (letters_vector[0]->font) {
     //     case UNIVERS:

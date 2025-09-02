@@ -50,6 +50,7 @@ int main_menu(int window_size[2]);
 void cell_grid_animation(int menu_start_row, int menu_start_col);
 void init_game_colors();
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]);
+
 // void *game_timer();
 // void alarm_handler() {
 //     counter++;
@@ -108,6 +109,7 @@ int main(int argc, char** argv) {
                 cell_grid_animation(menu_start_row, menu_start_col);
                 reset_game_session(&game_session, window_size); //which will pick new word
                 run_session(&game_session, letters_vector);
+                menu_input = main_menu(window_size);
                 // start timer, timer is gonna be a new thread that will sleep every second and whenever it wakes up it is gonna increment the time by one second
                 // pthread_t timer_thread;
                 // pthread_create(&timer_thread, NULL, game_timer, NULL);
@@ -126,7 +128,7 @@ int main(int argc, char** argv) {
 
                 // }
 
-                getch();
+                
                 // run_session();
                 // pthread_join(timer_thread, NULL); // I dont care about the retval
                 break;

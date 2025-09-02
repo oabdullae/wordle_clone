@@ -4,7 +4,11 @@
 #include <ctype.h>
 #include <string.h>
 #include "header.h"
+#include <stdlib.h>
 
+void spiral_clearing_animation(int menu_start_row, int menu_start_col);
+int wanna_quit(Game_Session* game_session);
+void saveSession(Game_Session *gamesession);
 int pick_random_word(char *buffer);
 void change_cursor(Game_Session *game_session, int action);
 void print_ascii_letter(Game_Session *game_session, Ascii_Art_Letter letters_vector[26], char letter);
@@ -259,6 +263,27 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                         game_session->entered_letters--;
                     break;
 
+                
+
+                case 27 ://esc
+                    // reaske the player if he wanna quit to menu or to stop game or continue
+                    int action = wanna_quit(game_session);
+                     if(action == 0){
+                        //resume
+                        break;
+                        }else {
+                            saveSession(game_session);
+                            if (action == 2){
+                            //go back to menu 
+                            int window_size[2];
+                            spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
+                            break;
+                            }else {//quit the game 
+                            endwin(); 
+                            exit(0);
+                            }
+                        }
+                        break;
                 default:
                     if (isalpha(key_stroke)) { //writing behavior , do whatver with isLetter whether it's a function or it's inside here
                         if (game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') { // if cell at cursor is empty
