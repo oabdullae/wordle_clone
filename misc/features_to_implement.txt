@@ -4,3 +4,4 @@
 - automatic window resizing
 - encrypt wordle_answers.txt with a simple encrypting algorithm like ROT13
 - add meaning of the word at the end of the session
+- animate winning_animation more maybe
