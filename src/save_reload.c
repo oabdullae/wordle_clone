@@ -6,7 +6,6 @@
 #include "header.h"
 
 void save_session(Game_Session *gamesession) {
-    getch();
     FILE *file = fopen("saved_game.bin", "wb");
     if (!file) {
         perror("Failed to open file for writing");
@@ -16,22 +15,19 @@ void save_session(Game_Session *gamesession) {
     fclose(file);
 }
 
-Game_Session *load_session() {
+int load_session(Game_Session *session) {
     FILE *file = fopen("saved_game.bin", "rb");
     if (!file) {
         perror("Failed to open file for reading");
-        return NULL;
+        return 0; // fail
     }
 
-    Game_Session *session = malloc(sizeof(Game_Session));
-    if (!session) {
-        perror("Memory allocation failed");
+    if (fread(session, sizeof(Game_Session), 1, file) != 1) {
+        perror("Failed to read session");
         fclose(file);
-        return NULL;
+        return 0;
     }
 
-    fread(session, sizeof(Game_Session), 1, file);
     fclose(file);
-
-    return session;
+    return 1; // success
 }

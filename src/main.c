@@ -50,6 +50,8 @@ int main_menu(int window_size[2]);
 void cell_grid_animation(int menu_start_row, int menu_start_col);
 void init_game_colors();
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]);
+int load_session(Game_Session *session) ;
+
 
 // void *game_timer();
 // void alarm_handler() {
@@ -137,10 +139,29 @@ int main(int argc, char** argv) {
 
             case CONTINUE:
                 cell_grid_animation(menu_start_row, menu_start_col);
-                getch();
-                //continue session without change
-                // load_previous_session();
-                // run_session();
+                if (load_session(&game_session)) {
+                    char revived_letter;
+                    for (int i = 0; i <= game_session.current_attempt; ++i) { // loop over attempts made
+                        for (int j = 0; j < WORD_LENGTH; ++j) { // loop over 5 letters in every row
+                            attron(COLOR_PAIR(game_session.matrix_colors[i][j]));
+                            for (int k = 0; k < CELL_HEIGHT; ++k) {
+                                revived_letter = game_session.history_matrix[i][j];
+                                mvprintw(game_session.menu_start_row+1  + (i) *(CELL_HEIGHT + 1) + k,
+                                        game_session.menu_start_col+2 + j*(CELL_WIDTH + 2),
+                                        "%s", letters_vector[revived_letter - 'a'].buffer[k]
+                                        );
+                            }
+                            attroff(COLOR_PAIR(game_session.matrix_colors[i][j]));
+                            refresh();
+                            
+                        }
+                    }
+                    run_session(&game_session, letters_vector);
+                } else {
+                    // NEW_GAME
+                    reset_game_session(&game_session, window_size); //which will pick new word
+                    run_session(&game_session, letters_vector);
+                }
                 break;
 
             case SETTINGS:

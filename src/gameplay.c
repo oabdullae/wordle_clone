@@ -51,7 +51,7 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
     while (game_session->current_attempt < NUM_ATTEMPTS) { // session loop consisting of at most 6 attempts
         //either display cursor at (game_session.cursor[X],game_session.cursor[Y])
         //set it to the start of the line 
-        game_session->cursor = 0;
+        //game_session->cursor = 0;
 
         //display cursor position
         usleep(150000);
