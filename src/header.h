@@ -31,7 +31,7 @@ typedef struct {
     int entered_letters; // holds the number of letters entered in an attempt
     int cursor; // to point to a cell in a given attempt, range(0,4)
     int time_elapsed; // to store how much time the player took so far
-    bool game_ended;
+    bool game_won;
     int menu_start_row, menu_start_col; 
 } Game_Session;
 
@@ -56,6 +56,12 @@ typedef enum {
     SETTINGS,
     QUIT
 } menu_options;
+
+typedef enum {
+    NEW_GAME_END,
+    MAIN_MENU_END,
+    QUIT_END
+} end_menu_options;
 
 typedef enum{
     NO_COLOR = 10, // undetermined 

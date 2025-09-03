@@ -18,7 +18,7 @@ void highlight_letter(Game_Session *game_session, int color, int letter_position
 void invalid_word_warning(Game_Session *game_session);
 void too_short_warning(Game_Session *game_session);
 void restore_after_pause(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]);
-void winning_animation(Game_Session *game_session);
+int end_animation(Game_Session *game_session);
 void correct_word_animation(Game_Session *game_session);
 // void move_cursor(Game_Session *game_session, int attempt, int old_cursor, int new_cursor);
 
@@ -32,17 +32,17 @@ void reset_game_session(Game_Session *game_session, int window_size[2]) {
     }
     game_session->current_attempt = 0;
     game_session->cursor = 0;
-    game_session->game_ended = false;
+    game_session->game_won = false;//game is not won by default
     game_session->entered_letters = 0;
     game_session->time_elapsed = 0;
     game_session->menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2;
     game_session->menu_start_col = (window_size[COL] - MENU_WIDTH)/2;
     pick_random_word(game_session->wordle_answer);
     // strcpy(game_session->wordle_answer, "thumb");
-    /* temporary debug */mvprintw(0, 0, "randomly picked word: %s", game_session->wordle_answer);
+    // /* temporary debug */mvprintw(0, 0, "randomly picked word: %s", game_session->wordle_answer);
 }
 
-void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]) { // skeleton made by Anas
+int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]) { // skeleton made by Anas
     // char wordle_guess[6] = {"     "}; //spaces means empty
     int key_stroke/* , number_of_entered_letters = 0 */;//rename to something less verbose
     //works with a game session that already exists
@@ -103,21 +103,20 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                             mvprintw(game_session->menu_start_row + (CELL_HEIGHT+1)*3, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
                             mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
                             // block till any key is pressed
+                            attroff(A_STANDOUT | A_BLINK);
                             getch();
+                            attron(A_STANDOUT);
                             // remove "PRESS ANY KEY TO PROCEED!!" from the top and bottom borders
                             mvprintw(game_session->menu_start_row, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
                             mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
-                            attroff(A_STANDOUT | A_BLINK);
-
+                            attroff(A_STANDOUT);
+                            
 
                             //you win update ui
-                            winning_animation(game_session);
+                            game_session->game_won = true;
+                            int end_menu_choice = end_animation(game_session);
+                            return end_menu_choice;
                             
-                            // goto SESSION_END; // just make current_attempt = NUM_ATTEMPTS to exit loop
-                            game_session->current_attempt = NUM_ATTEMPTS;
-                            is_valid_word = true;
-                            refresh();
-                            usleep(2000000);
                         }
                         else if (is_word_english(game_session->history_matrix[game_session->current_attempt])) {
                             is_valid_word = true;
@@ -241,6 +240,15 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                             game_session->cursor = FIRST_CELL_INDEX; // move cursor to the start
                             game_session->entered_letters = 0; // reset entered_letters counter back to 0
 
+                            //LOSS 
+                            if (game_session->current_attempt >= NUM_ATTEMPTS) { //all attemps have been used and haven't won since you are here
+                                
+                                for(int i = 0; i < NUM_ATTEMPTS; ++i) {
+                                    game_session->current_attempt = i;//hhhhhhhhhhhhhhhhhhhh
+                                    invalid_word_warning(game_session);
+                                }
+                                return end_animation(game_session);//returns user choice from the end menu
+                            }
                             
                             //NOTE: DO NOT display position, because it will show outside
                             //      it is already updated at the start of every attempt
@@ -357,7 +365,7 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
         // NEXT_ATTEMPT://go here so we go to next attempt
 
     }
-    
+    game_session->game_won = false;
     // SESSION_END:
     //we either run out of attemps or we won the game
 

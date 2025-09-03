@@ -101,8 +101,8 @@ int main_menu(int window_size[2]) {
             case KEY_UP:
                 // all attributes are deactivated by default, we write the underline regularly of the 
                 mvprintw(underlines_positions[menu_choice], (window_size[COL] - 32)/2, "===============================");
-                menu_choice -= (menu_choice == 0) ? -3 : 1;
-                // mvprintw(0, 5, "%d", menu_choice);
+                menu_choice = (menu_choice - 1 + 4) % 4;
+                // menu_choice -= (menu_choice == 0) ? -3 : 1;
                 attron(A_BLINK | A_STANDOUT);
                 mvprintw(underlines_positions[menu_choice], (window_size[COL] - 32)/2, "===============================");
                 attroff(A_BLINK | A_STANDOUT);
@@ -262,6 +262,8 @@ int escape_menu(Game_Session* game_session) {
     } while (1);
     
 
+
+    
 /*
     const char *top_ascii[] = {
         " __    _  _  __ __       _     _  _ ______ _    ",
@@ -369,5 +371,89 @@ int escape_menu(Game_Session* game_session) {
         }
     }
 */
+}
+
+int end_menu(int end_menu_top_border, int options_left_border, int options_width) {
+    
+    int enter_counter = 0;
+    int underlines_positions[3];
+    int end_menu_choice = NEW_GAME_END;
+
+    end_menu_top_border += 5;
+    mvprintw(++end_menu_top_border, options_left_border + (options_width - 28)/2, "     __       __  _       __");
+    mvprintw(++end_menu_top_border, options_left_border + (options_width - 28)/2, "|\\| |_  | |  /__ |_| |V| |_ ");
+    mvprintw(++end_menu_top_border, options_left_border + (options_width - 28)/2, "| | |__ |^|  \\_| | | | | |__");
+    end_menu_top_border += 2;
+    underlines_positions[NEW_GAME_END] = end_menu_top_border;
+    attron(A_STANDOUT | A_BLINK);
+    for (int i = 0; i < 32; ++i) {
+        mvaddch(end_menu_top_border, options_left_border + (options_width - 32)/2 + i, '=');
+    }
+    attroff(A_STANDOUT | A_BLINK);
+
+    // MAIN MENU
+    ++end_menu_top_border;
+    mvprintw(++end_menu_top_border, options_left_border +(options_width - 32)/2, "     _  ___           __        ");
+    mvprintw(++end_menu_top_border, options_left_border +(options_width - 32)/2, "|V| |_|  |  |\\|  |V| |_  |\\| | |");
+    mvprintw(++end_menu_top_border, options_left_border +(options_width - 32)/2, "| | | | _|_ | |  | | |__ | | |_|");
+    end_menu_top_border += 2;
+
+    underlines_positions[MAIN_MENU_END] = end_menu_top_border;
+
+    for (int i = 0; i < 32; ++i) {
+        mvaddch(end_menu_top_border, options_left_border + (options_width - 32)/2 + i, '=');
+    }
+
+
+    // QUIT
+    ++end_menu_top_border;
+    mvprintw(++end_menu_top_border, options_left_border +(options_width - 16)/2, " _      ___ ___");
+    mvprintw(++end_menu_top_border, options_left_border +(options_width - 16)/2, "/ \\ | |  |   | ");
+    mvprintw(++end_menu_top_border, options_left_border +(options_width - 16)/2, "\\_X |_| _|_  | ");
+    end_menu_top_border += 2;
+
+    underlines_positions[QUIT_END] = end_menu_top_border;
+
+    for (int i = 0; i < 32; ++i) {
+        mvaddch(end_menu_top_border, options_left_border + (options_width - 32)/2 + i, '=');
+    }
+
+
+    int pressed_key;
+    do {
+        pressed_key = getch();
+        switch (pressed_key) {
+            case KEY_UP:
+                // all attributes are deactivated by default, we write the underline regularly of the 
+                for (int i = 0; i < 32; ++i) {
+                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                }
+               
+                end_menu_choice = (end_menu_choice - 1 + 3) % 3;
+                // mvprintw(0, 5, "%d", end_menu_choice);
+                attron(A_BLINK | A_STANDOUT);
+                for (int i = 0; i < 32; ++i) {
+                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                }
+                attroff(A_BLINK | A_STANDOUT);
+                break;
+            case KEY_DOWN:
+                for (int i = 0; i < 32; ++i) {
+                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                }
+                // end_menu_choice += (end_menu_choice == 3) ? -3 : 1;
+                end_menu_choice = (end_menu_choice + 1) % 3;
+                attron(A_BLINK | A_STANDOUT);
+                for (int i = 0; i < 32; ++i) {
+                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                }
+                attroff(A_BLINK | A_STANDOUT);
+                break;
+            case '\n':
+                return end_menu_choice;
+                
+            // default: just ignore it and loop back
+        }
+    } while (1);
 }
 

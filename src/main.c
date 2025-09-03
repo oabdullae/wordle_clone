@@ -42,7 +42,7 @@ typedef struct {
 // int tick = 0;
 
 //MARK: PROTOTYPES
-void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]);
+int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]);
 void settings_menu();
 void reset_game_session(Game_Session *game_session, int window_size[2]);
 void exit_prompt();
@@ -51,7 +51,7 @@ void cell_grid_animation(int menu_start_row, int menu_start_col);
 void init_game_colors();
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]);
 int load_session(Game_Session *session) ;
-
+void spiral_clearing_animation(int menu_start_row, int menu_start_col);
 
 // void *game_timer();
 // void alarm_handler() {
@@ -85,6 +85,7 @@ int main(int argc, char** argv) {
     srand(time(NULL) * getpid());
 
     //verify window size block if not big enough
+    int end_menu_choice;
     int window_size[2];
     getmaxyx(stdscr, window_size[ROW], window_size[COL]);
     if (window_size[ROW] < MENU_HEIGHT || window_size[COL] < MENU_WIDTH/* to update later */) {
@@ -110,9 +111,13 @@ int main(int argc, char** argv) {
         int menu_input = main_menu(window_size);
         switch(menu_input) {
             case NEW_GAME:
+                NEW_GAME_LABEL:
                 cell_grid_animation(menu_start_row, menu_start_col);
                 reset_game_session(&game_session, window_size); //which will pick new word
-                run_session(&game_session, letters_vector);
+                end_menu_choice = run_session(&game_session, letters_vector);
+                if(end_menu_choice == NEW_GAME) {
+                    goto NEW_GAME_LABEL;
+                }
 
                 // start timer, timer is gonna be a new thread that will sleep every second and whenever it wakes up it is gonna increment the time by one second
                 // pthread_t timer_thread;
@@ -156,16 +161,19 @@ int main(int argc, char** argv) {
                             
                         }
                     }
-                    run_session(&game_session, letters_vector);
-                } else {
-                    // NEW_GAME
-                    reset_game_session(&game_session, window_size); //which will pick new word
-                    run_session(&game_session, letters_vector);
+                    end_menu_choice = run_session(&game_session, letters_vector);
+                } else {//in case failing to load
+                    goto NEW_GAME_LABEL;
                 }
                 break;
 
             case SETTINGS:
+            
+                mvprintw((window_size[ROW] - MENU_HEIGHT)/2 + (MENU_HEIGHT - 1)/2, (window_size[COL] - MENU_WIDTH)/2 + (MENU_WIDTH -17)/2, "To be implemented");
                 getch();
+                mvprintw((window_size[ROW] - MENU_HEIGHT)/2 + (MENU_HEIGHT - 1)/2, (window_size[COL] - MENU_WIDTH)/2 + (MENU_WIDTH -17)/2, "                 ");
+
+
                 // settings_menu();//to be implemented later, any applied font setting will reload the entire UI
                 break;
 
@@ -175,7 +183,7 @@ int main(int argc, char** argv) {
 
             //no need for default since do nothing! , oabd: we may need default if we have no do-while loop
         }
-    } while (1 /* temporary */);
+    } while (1);
     GAME_END:
     
     
