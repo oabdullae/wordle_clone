@@ -18,6 +18,8 @@ void highlight_letter(Game_Session *game_session, int color, int letter_position
 void invalid_word_warning(Game_Session *game_session);
 void too_short_warning(Game_Session *game_session);
 void restore_after_pause(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]);
+void winning_animation(Game_Session *game_session);
+void correct_word_animation(Game_Session *game_session);
 // void move_cursor(Game_Session *game_session, int attempt, int old_cursor, int new_cursor);
 
 void reset_game_session(Game_Session *game_session, int window_size[2]) {
@@ -89,14 +91,30 @@ void run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]
                     }
                     else {
                         if (strcmp(game_session->wordle_answer, game_session->history_matrix[game_session->current_attempt]) == 0) {
-                            // color all letters in green
-                            for (int i = 0; i < WORD_LENGTH; ++i) {
-                                highlight_letter(game_session, GREEN, i);
-                            }
+                            // hide cursor
+                            change_cursor(game_session,  DELETE_CURSOR);
                             
+                            // color all letters in green
+                            correct_word_animation(game_session);
+
+                            // block program for press any key prompt to give the player time for reflecting on the last state of his session
+                            attron(A_STANDOUT | A_BLINK);
+                            mvprintw(game_session->menu_start_row, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
+                            mvprintw(game_session->menu_start_row + (CELL_HEIGHT+1)*3, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
+                            mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
+                            // block till any key is pressed
+                            getch();
+                            // remove "PRESS ANY KEY TO PROCEED!!" from the top and bottom borders
+                            mvprintw(game_session->menu_start_row, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
+                            mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
+                            attroff(A_STANDOUT | A_BLINK);
+
+
                             //you win update ui
-                            // goto SESSION_END; // just make current_attempt = 6 to exit loop
-                            game_session->current_attempt = 6;
+                            winning_animation(game_session);
+                            
+                            // goto SESSION_END; // just make current_attempt = NUM_ATTEMPTS to exit loop
+                            game_session->current_attempt = NUM_ATTEMPTS;
                             is_valid_word = true;
                             refresh();
                             usleep(2000000);
