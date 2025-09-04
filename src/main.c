@@ -52,7 +52,7 @@ void init_game_colors();
 void init_ascii_art(Ascii_Art_Letter letters_vector[26]);
 int load_session(Game_Session *session) ;
 void spiral_clearing_animation(int menu_start_row, int menu_start_col);
-
+int end_animation(Game_Session *game_session);
 // void *game_timer();
 // void alarm_handler() {
 //     counter++;
@@ -143,12 +143,25 @@ int main(int argc, char** argv) {
                 break;
 
             case CONTINUE:
+            if (load_session(&game_session)) {
+                if(game_session.game_ended == true) {//I set this to be false when games end, might as well use it
+                    end_menu_choice = end_animation(&game_session);
+                    if(end_menu_choice == NEW_GAME_END) {
+                        goto NEW_GAME_LABEL;
+                    } else if(end_menu_choice == QUIT) {
+                        curs_set(1);
+                        endwin();
+                        exit(0);
+                    } else {
+                        break;//exit the switch case
+                    }
+                }
+                //else the loaded game hasn't ended yet 
                 cell_grid_animation(menu_start_row, menu_start_col);
-                if (load_session(&game_session)) {
-                    char revived_letter;
-                    for (int i = 0; i <= game_session.current_attempt; ++i) { // loop over attempts made
-                        for (int j = 0; j < WORD_LENGTH; ++j) { // loop over 5 letters in every row
-                            attron(COLOR_PAIR(game_session.matrix_colors[i][j]));
+                char revived_letter;
+                for (int i = 0; i <= game_session.current_attempt; ++i) { // loop over attempts made
+                    for (int j = 0; j < WORD_LENGTH; ++j) { // loop over 5 letters in every row
+                        attron(COLOR_PAIR(game_session.matrix_colors[i][j]));
                             for (int k = 0; k < CELL_HEIGHT; ++k) {
                                 revived_letter = game_session.history_matrix[i][j];
                                 mvprintw(game_session.menu_start_row+1  + (i) *(CELL_HEIGHT + 1) + k,

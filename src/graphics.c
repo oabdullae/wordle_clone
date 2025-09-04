@@ -84,8 +84,10 @@ void restore_after_pause(Game_Session *game_session, Ascii_Art_Letter letters_ve
         }
     }
 
-    // restoring cursor
-    change_cursor(game_session, PRINT_CURSOR);
+    if(game_session->game_ended == false) {
+        // restoring cursor
+        change_cursor(game_session, PRINT_CURSOR);
+    }
 
     // redrawing borders
     attron(A_STANDOUT);

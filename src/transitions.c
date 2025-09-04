@@ -113,19 +113,19 @@ void cell_grid_animation(int menu_start_row, int menu_start_col) {
 
 void invalid_word_warning(Game_Session *game_session) {
     for (int j = 0; j < 2; ++j) {
-        attron(A_BLINK);
         for (int i = 0; i < WORD_LENGTH; ++i) {
             highlight_letter(game_session, RED, i);
+            usleep(20000);
         }
-        attroff(A_BLINK);
-        flushinp();
-        usleep(200000);
+
+        usleep(20000);
+
         for (int i = 0; i < WORD_LENGTH; ++i) {
             highlight_letter(game_session, NO_COLOR, i);
+            usleep(20000);
         }
-        flushinp(); // discard queueed input
-        usleep(200000);
     }
+    flushinp(); // discard queueed input
 }
 
 void too_short_warning(Game_Session *game_session) {
@@ -206,7 +206,7 @@ int end_animation(Game_Session *game_session) {
         mvprintw(++end_menu_top_border, end_menu_left_border+2 + (end_menu_animation_width - 54)/2, "88            Y8a.    .a8P  Y8a      a8P       88        "); refresh(); usleep(20000);
         mvprintw(++end_menu_top_border, end_menu_left_border+2 + (end_menu_animation_width - 54)/2, "888888888888   `\"Y8888Y\"'    \"Y888888P\"        88      88"); refresh(); usleep(20000);
 
-
+        refresh();
         display_answer(game_session);
 
     }
@@ -220,12 +220,14 @@ int end_animation(Game_Session *game_session) {
 
     int end_menu_choice = end_menu(end_menu_top_border-3, options_left_border, options_width);
     spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
-    if(end_menu_choice == QUIT_END) {
-        curs_set(1);
-        endwin();
-        exit(0);
-        //default: DO NOTHING "oabdullah"
-    }
+    // if(end_menu_choice == QUIT_END) {//let's return QUIT_END so that we can exit while saving like normal
+    //     curs_set(1);
+    //     endwin();
+    //     exit(0);
+    //     //default: DO NOTHING "oabdullah"
+    // }
+
+    game_session->game_ended = true; // this marks the game as truly finished
     return end_menu_choice;
     
     //only reaches here if main_menu
@@ -341,12 +343,13 @@ void display_answer(Game_Session *game_session) {
     
     //           7aytam was here  ;)
     attron(A_BLINK);
-    mvprintw(current_row+4, answer_start_col+ (box_width-14)/2,"Made by 7aytam");
+    mvprintw(current_row+4, answer_start_col+ (box_width-22)/2,"Better Luck next time!");
     attroff(A_BLINK);
 
 }
 
 void congratulate_player(Game_Session *game_session) {
+
     const char *congrat_str = "congrats";
     int word_length = strlen(congrat_str);
 
@@ -366,10 +369,17 @@ void congratulate_player(Game_Session *game_session) {
         mvprintw(current_row++, current_col + i*(5+2),"  %c  ", toupper(congrat_str[i]));
         mvprintw(current_row++, current_col + i*(5+2),"     ");
         current_row-=3;
-        attroff(COLOR_PAIR(GREEN) | A_BLINK |A_ITALIC | A_BOLD);
-        usleep(300000);
-        refresh();
+        attroff(COLOR_PAIR(GREEN) | A_BLINK | A_ITALIC | A_BOLD);
+        if(game_session->game_ended == false) {//don't animate this whenn game ended already
+            usleep(300000);
+            refresh();
+        }
     }   
+
+    if(game_session->game_ended == true) {//game ended and 
+        refresh();
+        usleep(300000);
+    }
     usleep(400000);
 
 }

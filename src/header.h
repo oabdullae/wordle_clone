@@ -32,6 +32,7 @@ typedef struct {
     int cursor; // to point to a cell in a given attempt, range(0,4)
     int time_elapsed; // to store how much time the player took so far
     bool game_won;
+    bool game_ended;//to disable writing to an already ended session
     int menu_start_row, menu_start_col; 
 } Game_Session;
 

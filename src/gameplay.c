@@ -33,6 +33,7 @@ void reset_game_session(Game_Session *game_session, int window_size[2]) {
     game_session->current_attempt = 0;
     game_session->cursor = 0;
     game_session->game_won = false;//game is not won by default
+    game_session->game_ended = false;
     game_session->entered_letters = 0;
     game_session->time_elapsed = 0;
     game_session->menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2;
@@ -42,9 +43,15 @@ void reset_game_session(Game_Session *game_session, int window_size[2]) {
     // /* temporary debug */mvprintw(0, 0, "randomly picked word: %s", game_session->wordle_answer);
 }
 
+//MARK: RUN_SESSION
 int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26]) { // skeleton made by Anas
     // char wordle_guess[6] = {"     "}; //spaces means empty
     int key_stroke/* , number_of_entered_letters = 0 */;//rename to something less verbose
+    //character highlight delay
+    int character_highlight_delay = 50000; 
+
+    int loss_highlight_delay = 40000;
+    
     //works with a game session that already exists
     //display UI;
     // /* debug */int index = 2;
@@ -55,7 +62,9 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
 
         //display cursor position
         usleep(150000);
-        change_cursor(game_session, PRINT_CURSOR);
+        if(game_session->game_ended == false) {
+            change_cursor(game_session, PRINT_CURSOR);
+        }
         
         bool is_valid_word;
         do { // GET_VALID_WORD loop, will loop while the word is invalid
@@ -64,6 +73,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
             int key_stroke = getch();
             switch (key_stroke) {
                 case KEY_LEFT:
+                    if(game_session->game_ended == true) break;//do nothing if no input is allowed
                     if(game_session->cursor != FIRST_CELL_INDEX) {
                         // update cursor, and its UI cursor position
                         change_cursor(game_session, DELETE_CURSOR);
@@ -74,6 +84,8 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                     break;
                 
                 case KEY_RIGHT:
+                case ' ':
+                    if(game_session->game_ended == true) break;//do nothing if no input is allowed
                     if(game_session->cursor != LAST_CELL_INDEX) {
                         // update cursor, and its UI cursor position
                         change_cursor(game_session,  DELETE_CURSOR);
@@ -84,7 +96,6 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                     break;
 
                 case '\n':
-                
                     if (game_session->entered_letters < 5) {
                         // display too short
                         too_short_warning(game_session);
@@ -98,23 +109,25 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             correct_word_animation(game_session);
 
                             // block program for press any key prompt to give the player time for reflecting on the last state of his session
-                            attron(A_STANDOUT | A_BLINK);
-                            mvprintw(game_session->menu_start_row, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
-                            mvprintw(game_session->menu_start_row + (CELL_HEIGHT+1)*3, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
-                            mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
-                            // block till any key is pressed
-                            attroff(A_STANDOUT | A_BLINK);
-                            getch();
-                            attron(A_STANDOUT);
-                            // remove "PRESS ANY KEY TO PROCEED!!" from the top and bottom borders
-                            mvprintw(game_session->menu_start_row, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
-                            mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
-                            attroff(A_STANDOUT);
+                            // attron(A_STANDOUT | A_BLINK);
+                            // mvprintw(game_session->menu_start_row, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
+                            // mvprintw(game_session->menu_start_row + (CELL_HEIGHT+1)*3, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
+                            // mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "PRESS ANY KEY TO PROCEED!!");
+                            // // block till any key is pressed
+                            // attroff(A_STANDOUT | A_BLINK);
+                            // getch();
+                            // attron(A_STANDOUT);
+                            // // remove "PRESS ANY KEY TO PROCEED!!" from the top and bottom borders
+                            // mvprintw(game_session->menu_start_row, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
+                            // mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
+                            // attroff(A_STANDOUT);
                             
 
                             //you win update ui
                             game_session->game_won = true;
+                            
                             int end_menu_choice = end_animation(game_session);
+                            save_session(game_session);//even won sessions should be saved
                             return end_menu_choice;
                             
                         }
@@ -125,18 +138,20 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             // colored_letters to hold the colored letters in the wordle answer
                             char colored_letters[5] = {' ', ' ', ' ', ' ', ' '}; // ' ' for uncolored, 'G' for green, 'Y' for yellow (we dont care about gray)
                             // we go green all correct letters in their positions first
-                            for (int i = 0; i < WORD_LENGTH; ++i) { // to solve CANAL with CENAL
+
+                            for (int i = 0; i < WORD_LENGTH; ++i) { // to solve CANAL with CENAL, mark all that are green
+
                                 // check if the letter is in its position, if yes: green it and mark it already greened, and quit
                                 if (game_session->history_matrix[game_session->current_attempt][i] == game_session->wordle_answer[i]) {
-                                    // color green
-                                    highlight_letter(game_session, GREEN, i);
+
                                     // marking green for this algorithm to work properly
                                     colored_letters[i] = 'G';
                                     // save for loading
                                     game_session->matrix_colors[game_session->current_attempt][i] = GREEN;
                                 }
                             }
-                            for (int i = 0; i < WORD_LENGTH; ++i) {
+
+                            for (int i = 0; i < WORD_LENGTH; ++i) { //mark all that are yellow
                                 if (game_session->matrix_colors[game_session->current_attempt][i] == GREEN) // no need to check greened letters, just skip by continue;
                                     continue;
                                 
@@ -147,8 +162,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                                         colored_letters[j] != 'Y' /* solves LOGIN with HELLO and ALPHA with CANAL with the help of colored_letters[] */
                                     ) { // only search among letters that are uncolored, and of course skip the cas i==j, cuz we already checked that just above
                                         if (game_session->history_matrix[game_session->current_attempt][i] == game_session->wordle_answer[j]) {
-                                            // color yellow
-                                            highlight_letter(game_session, YELLOW, i);
+
                                             game_session->matrix_colors[game_session->current_attempt][i] = YELLOW;
                                             colored_letters[j] = 'Y'; // mark the letter yellowed for the algorithm to work properly
                                             break;
@@ -184,12 +198,17 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                                     */
                                 // if no then gray it, this way no greened letter will appear yellow (e.g. if answer was THUMB, and guess was TOAST, only first T should be greened, and second T should not be yellowed)
                                 if (game_session->matrix_colors[game_session->current_attempt][i] != YELLOW) { // if letter was not yellowed, gray it
-                                    // color in gray
-                                    highlight_letter(game_session, GRAY, i);
+
                                     game_session->matrix_colors[game_session->current_attempt][i] = GRAY;
                                 }
                             }
-
+                   
+                            for(int i = 0; i < WORD_LENGTH; ++i) {
+                                highlight_letter(game_session, game_session->matrix_colors[game_session->current_attempt][i], i);
+                                usleep(character_highlight_delay);
+                                refresh();
+                            }
+                            flushinp();//ignore anything during the animation
                             /* OLD BUGGY ATTEMPT, but good trial that helped develop the above algorithm
                             for (int i = 0; i < WORD_LENGTH; ++i) {
                                 // solve here;
@@ -244,10 +263,28 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             if (game_session->current_attempt >= NUM_ATTEMPTS) { //all attemps have been used and haven't won since you are here
                                 
                                 for(int i = 0; i < NUM_ATTEMPTS; ++i) {
-                                    game_session->current_attempt = i;//hhhhhhhhhhhhhhhhhhhh
-                                    invalid_word_warning(game_session);
+                                    game_session->current_attempt = i;
+                                    for(int j = 0; j < WORD_LENGTH; ++j) {
+                                        highlight_letter(game_session, RED, j);
+                                        usleep(loss_highlight_delay);
+                                    }
                                 }
-                                return end_animation(game_session);//returns user choice from the end menu
+
+                                for(int i = 0; i < NUM_ATTEMPTS; ++i) {
+                                    game_session->current_attempt = i;
+                                    for(int j = 0; j < WORD_LENGTH; ++j) {
+                                        highlight_letter(game_session, NO_COLOR, j);
+                                        usleep(loss_highlight_delay);
+                                    }
+                                }
+
+                                // for(int i = 0; i < NUM_ATTEMPTS; ++i) {
+                                //     game_session->current_attempt = i;//hhhhhhhhhhhhhhhhhhhh
+                                //     invalid_word_warning(game_session);
+                                // }
+                                int end_menu_choice = end_animation(game_session);
+                                save_session(game_session);//this will NOT allow you to cheat hehehehaw, don't dare lose
+                                return end_menu_choice; //returns user choice from the end menu
                             }
                             
                             //NOTE: DO NOT display position, because it will show outside
@@ -255,7 +292,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             // goto NEXT_ATTEMPT;
                         }
                         else {//INVALID WORD
-                            //display warning word not found 
+                            //display warning word not found                    
                             is_valid_word = false;
                             invalid_word_warning(game_session);
                             // break; //exit the switch case and wait for new input // ANAAAAAAAASSSSS!!!!!!! you caused a bug by this
@@ -264,32 +301,53 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                     break; // ANAAAAASSS break should be here!!!!!
 
                 case KEY_BACKSPACE:
-                    //NOTE:  wordle_guess[game_session.cursor_position[X]] is basically current cell pointed by cursor
-                    //        and see if it's not space aka not empty, i decided that ' ' == empty
-                    if(game_session->cursor != FIRST_CELL_INDEX && game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') {
-                        // move cursor backwards 
-                        change_cursor(game_session, DELETE_CURSOR);
-                        game_session->cursor += LEFT;
-                        change_cursor(game_session, PRINT_CURSOR);
-                    }
-                    // if cursor got moved backwards we delete the letter that was before the cursor
-                    // if not, then we just delete the letter that the cursor is pointing at, and keep cursor at its position
-                    game_session->history_matrix[game_session->current_attempt][game_session->cursor] = ' ';
-                        
-                    // delete letter in UI
-                    delete_ascii_letter(game_session); // TODO
-
-                    // /* debug */ mvprintw(game_session->menu_start_row + 2  + game_session->current_attempt * (CELL_HEIGHT + 1),
-                    //                         game_session->menu_start_col + 3 + game_session->cursor * (CELL_WIDTH + 2),
-                    //                         " "
-                    //                     ); // kept for history
-
-                    // decrement entered_letters counter
-                    if (game_session->entered_letters != 0) // never decrement the counter if it already reached 0
-                        game_session->entered_letters--;
-                    break;
-
                 
+                    if(game_session->game_ended == false) {
+
+                        //NOTE:  wordle_guess[game_session.cursor_position[X]] is basically current cell pointed by cursor
+                        //        and see if it's not space aka not empty, i decided that ' ' == empty
+                        // if(game_session->cursor != FIRST_CELL_INDEX && game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') {
+                        //     // move cursor backwards 
+                        //     change_cursor(game_session, DELETE_CURSOR);
+                        //     game_session->cursor += LEFT;
+                        //     change_cursor(game_session, PRINT_CURSOR);
+                        // }
+
+                        //the code before caused a bug because it would subtract a letter when we subract air ' '
+                        if(game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') {
+                            if(game_session->cursor != FIRST_CELL_INDEX) {
+                                //go back with the cursor
+                                change_cursor(game_session, DELETE_CURSOR);
+                                game_session->cursor += LEFT;
+                                change_cursor(game_session, PRINT_CURSOR);
+
+                                //only delete previous character if NOT empty
+                                if(game_session->history_matrix[game_session->current_attempt][game_session->cursor] != ' ') {
+                                    game_session->history_matrix[game_session->current_attempt][game_session->cursor] = ' ';
+                                    delete_ascii_letter(game_session); 
+                                    --game_session->entered_letters;
+                                }
+                                //no letter subtraction should be done UNLESS there is a letter removed
+                            }
+                        } else {//the cell is NOT empty
+                            game_session->history_matrix[game_session->current_attempt][game_session->cursor] = ' ';
+                            delete_ascii_letter(game_session); 
+                            --game_session->entered_letters;
+                        }
+                        
+                        // if cursor got moved backwards we delete the letter that was before the cursor
+                        // if not, then we just delete the letter that the cursor is pointing at, and keep cursor at its position
+                        // /* debug */ mvprintw(game_session->menu_start_row + 2  + game_session->current_attempt * (CELL_HEIGHT + 1),
+                        //                         game_session->menu_start_col + 3 + game_session->cursor * (CELL_WIDTH + 2),
+                        //                         " "
+                        //                     ); // kept for history
+
+                        // // decrement entered_letters counter
+                        // if (game_session->entered_letters > 0) // never decrement the counter if it already reached 0
+                        //     game_session->entered_letters--;
+                            
+                    }
+                    break;
 
                 case ESCAPE_KEY: // Escape key
                     // reask the player if he wanna quit to menu or to stop game or continue
@@ -323,10 +381,10 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             exit(0);
                         }
                     }
-                    
-                    break;
+
+                    break; 
                 default:
-                    if (isalpha(key_stroke)) { //writing behavior , do whatver with isLetter whether it's a function or it's inside here
+                    if (isalpha(key_stroke) && game_session->game_ended == false) { //writing behavior , do whatver with isLetter whether it's a function or it's inside here
                         if (game_session->history_matrix[game_session->current_attempt][game_session->cursor] == ' ') { // if cell at cursor is empty
                             // update history_matrix
                             game_session->history_matrix[game_session->current_attempt][game_session->cursor] = tolower(key_stroke);
@@ -347,7 +405,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             }
 
                             // increment the entered_letters
-                            game_session->entered_letters++;
+                            ++game_session->entered_letters;
                         }
                         // TODO: later
                         // else { // warning: cell is already filled
