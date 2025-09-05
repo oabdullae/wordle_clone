@@ -194,6 +194,7 @@ int escape_menu(Game_Session* game_session) {
 
     
     int menu_choice = RESUME_GAME; // cuz resume game is the default selection at the start of this menu
+    int relative_pos = RESUME_GAME - SAVE_AND_QUIT;//gives me position of RESUME_GAME relative to SAVE and Quit
     int input;
     do {
         input = getch();
@@ -224,14 +225,15 @@ int escape_menu(Game_Session* game_session) {
 
                 if (input == KEY_LEFT) {
                     // change menu_choice
-                    menu_choice = (menu_choice - 1 + 3) % 3;
-                    // menu_choice -= (menu_choice == 0) ? -2 : 1;  // for oabdullae's weak brain :(
+                    relative_pos = (relative_pos - 1 + 3) % 3;    
+                    // relative_pos -= (relative_pos == 0) ? -2 : 1;  // for oabdullae's weak brain :(
                 }
                 else { // KEY_RIGHT
                     // move highlight to the right
-                    menu_choice = (menu_choice + 1) % 3;
+                    relative_pos = (relative_pos + 1) % 3;
                 }
-                
+                menu_choice = SAVE_AND_QUIT + relative_pos;
+
                 // printing new highlight, NO_COLOR is the highlight
                 for (int i = 1; i < COMMON_HEIGHT+1; ++i) {
                     for (int j = 0; j < ((menu_choice == RESUME_GAME) ? RESUME_GAME_WIDTH : SAVE_QUIT_WIDTH); ++j) {
@@ -378,13 +380,15 @@ int end_menu(int end_menu_top_border, int options_left_border, int options_width
     int enter_counter = 0;
     int underlines_positions[3];
     int end_menu_choice = NEW_GAME_END;
+    int relative_pos = 0;
 
     end_menu_top_border += 5;
     mvprintw(++end_menu_top_border, options_left_border + (options_width - 28)/2, "     __       __  _       __");
     mvprintw(++end_menu_top_border, options_left_border + (options_width - 28)/2, "|\\| |_  | |  /__ |_| |V| |_ ");
     mvprintw(++end_menu_top_border, options_left_border + (options_width - 28)/2, "| | |__ |^|  \\_| | | | | |__");
     end_menu_top_border += 2;
-    underlines_positions[NEW_GAME_END] = end_menu_top_border;
+    //relative position starts 0 away from NEW_GAME
+    underlines_positions[relative_pos] = end_menu_top_border;
     attron(A_STANDOUT | A_BLINK);
     for (int i = 0; i < 32; ++i) {
         mvaddch(end_menu_top_border, options_left_border + (options_width - 32)/2 + i, '=');
@@ -397,8 +401,8 @@ int end_menu(int end_menu_top_border, int options_left_border, int options_width
     mvprintw(++end_menu_top_border, options_left_border +(options_width - 32)/2, "|V| |_|  |  |\\|  |V| |_  |\\| | |");
     mvprintw(++end_menu_top_border, options_left_border +(options_width - 32)/2, "| | | | _|_ | |  | | |__ | | |_|");
     end_menu_top_border += 2;
-
-    underlines_positions[MAIN_MENU_END] = end_menu_top_border;
+    
+    underlines_positions[MAIN_MENU_END - NEW_GAME_END] = end_menu_top_border;
 
     for (int i = 0; i < 32; ++i) {
         mvaddch(end_menu_top_border, options_left_border + (options_width - 32)/2 + i, '=');
@@ -412,7 +416,7 @@ int end_menu(int end_menu_top_border, int options_left_border, int options_width
     mvprintw(++end_menu_top_border, options_left_border +(options_width - 16)/2, "\\_X |_| _|_  | ");
     end_menu_top_border += 2;
 
-    underlines_positions[QUIT_END] = end_menu_top_border;
+    underlines_positions[QUIT_END - NEW_GAME_END] = end_menu_top_border;
 
     for (int i = 0; i < 32; ++i) {
         mvaddch(end_menu_top_border, options_left_border + (options_width - 32)/2 + i, '=');
@@ -426,28 +430,31 @@ int end_menu(int end_menu_top_border, int options_left_border, int options_width
             case KEY_UP:
                 // all attributes are deactivated by default, we write the underline regularly of the 
                 for (int i = 0; i < 32; ++i) {
-                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                    mvaddch(underlines_positions[relative_pos], options_left_border + (options_width - 32)/2 + i, '=');
                 }
                
-                end_menu_choice = (end_menu_choice - 1 + 3) % 3;
-                // mvprintw(0, 5, "%d", end_menu_choice);
+                relative_pos = (relative_pos - 1 + 3) % 3;
+                // mvprintw(0, 5, "%d", relative_pos);
                 attron(A_BLINK | A_STANDOUT);
                 for (int i = 0; i < 32; ++i) {
-                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                    mvaddch(underlines_positions[relative_pos], options_left_border + (options_width - 32)/2 + i, '=');
                 }
                 attroff(A_BLINK | A_STANDOUT);
+                end_menu_choice = relative_pos + NEW_GAME_END;
+
                 break;
             case KEY_DOWN:
                 for (int i = 0; i < 32; ++i) {
-                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                    mvaddch(underlines_positions[relative_pos], options_left_border + (options_width - 32)/2 + i, '=');
                 }
-                // end_menu_choice += (end_menu_choice == 3) ? -3 : 1;
-                end_menu_choice = (end_menu_choice + 1) % 3;
+                // relative_pos += (relative_pos == 3) ? -3 : 1;
+                relative_pos = (relative_pos + 1) % 3;
                 attron(A_BLINK | A_STANDOUT);
                 for (int i = 0; i < 32; ++i) {
-                    mvaddch(underlines_positions[end_menu_choice], options_left_border + (options_width - 32)/2 + i, '=');
+                    mvaddch(underlines_positions[relative_pos], options_left_border + (options_width - 32)/2 + i, '=');
                 }
                 attroff(A_BLINK | A_STANDOUT);
+                end_menu_choice = relative_pos + NEW_GAME_END;
                 break;
             case '\n':
                 return end_menu_choice;

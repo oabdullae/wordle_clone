@@ -115,10 +115,13 @@ int main(int argc, char** argv) {
                 cell_grid_animation(menu_start_row, menu_start_col);
                 reset_game_session(&game_session, window_size); //which will pick new word
                 end_menu_choice = run_session(&game_session, letters_vector);
-                if(end_menu_choice == NEW_GAME) {
+                if(end_menu_choice == NEW_GAME_END) {
                     goto NEW_GAME_LABEL;
-                }
-
+                } else if (end_menu_choice == QUIT_END) {
+                    curs_set(1);
+                    endwin();
+                    exit(0);
+                } //MAIN_MENU // will break anyway and just go to loop back to main menu
                 // start timer, timer is gonna be a new thread that will sleep every second and whenever it wakes up it is gonna increment the time by one second
                 // pthread_t timer_thread;
                 // pthread_create(&timer_thread, NULL, game_timer, NULL);
@@ -148,12 +151,12 @@ int main(int argc, char** argv) {
                     end_menu_choice = end_animation(&game_session);
                     if(end_menu_choice == NEW_GAME_END) {
                         goto NEW_GAME_LABEL;
-                    } else if(end_menu_choice == QUIT) {
+                    } else if(end_menu_choice == QUIT_END) {
                         curs_set(1);
                         endwin();
                         exit(0);
                     } else {
-                        break;//exit the switch case
+                        break;//exit the switch case to go loop back to main menu
                     }
                 }
                 //else the loaded game hasn't ended yet 

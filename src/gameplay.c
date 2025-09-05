@@ -84,13 +84,30 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                     break;
                 
                 case KEY_RIGHT:
-                case ' ':
                     if(game_session->game_ended == true) break;//do nothing if no input is allowed
                     if(game_session->cursor != LAST_CELL_INDEX) {
                         // update cursor, and its UI cursor position
                         change_cursor(game_session,  DELETE_CURSOR);
                         game_session->cursor += RIGHT;
                         change_cursor(game_session, PRINT_CURSOR);
+
+                    }//else do nothing
+                    break;
+
+                case ' ':
+                    if(game_session->game_ended == true) break;//do nothing if no input is allowed
+                    if(game_session->cursor != LAST_CELL_INDEX) {
+                        // update cursor, and its UI cursor position
+                        /*
+                        only move forward if:
+                            current cell is empty AND next cell is empty, so it feels like adding space to emptiness 
+                        */
+
+                        if(game_session->history_matrix[game_session->current_attempt][(game_session->cursor)] == ' ' && game_session->history_matrix[game_session->current_attempt][(game_session->cursor)+1] == ' ') {
+                            change_cursor(game_session,  DELETE_CURSOR);
+                            game_session->cursor += RIGHT;
+                            change_cursor(game_session, PRINT_CURSOR);
+                        } 
 
                     }//else do nothing
                     break;
@@ -122,7 +139,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             // mvprintw(game_session->menu_start_row+MENU_HEIGHT-1, game_session->menu_start_col + (MENU_WIDTH - 26)/2, "                          ");
                             // attroff(A_STANDOUT);
                             
-
+                            //MARK: 1st RETURN
                             //you win update ui
                             game_session->game_won = true;
                             
@@ -282,6 +299,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                                 //     game_session->current_attempt = i;//hhhhhhhhhhhhhhhhhhhh
                                 //     invalid_word_warning(game_session);
                                 // }
+                                //MARK: 2nd Return
                                 int end_menu_choice = end_animation(game_session);
                                 save_session(game_session);//this will NOT allow you to cheat hehehehaw, don't dare lose
                                 return end_menu_choice; //returns user choice from the end menu
@@ -353,7 +371,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                     // reask the player if he wanna quit to menu or to stop game or continue
                     // scr_dump("screen_save.scr");
                     int action = escape_menu(game_session);
-                    
+                    //escape menu returned value
                     if (action == RESUME_GAME) {
                         // resume
                         // scr_restore("screen_save.scr"); // should restore the cursor as well
@@ -370,8 +388,9 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                             spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
                             
                             // break out of both loops by breaking their conditions
-                            is_valid_word = true;
-                            game_session->current_attempt = NUM_ATTEMPTS;
+                            return MAIN_MENU;//go back to caller from main
+                            // is_valid_word = true;
+                            // game_session->current_attempt = NUM_ATTEMPTS;
                             break;
                         }
                         else { // SAVE_QUIT option quit the game 

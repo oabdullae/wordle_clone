@@ -59,7 +59,7 @@ typedef enum {
 } menu_options;
 
 typedef enum {
-    NEW_GAME_END,
+    NEW_GAME_END = 20,
     MAIN_MENU_END,
     QUIT_END
 } end_menu_options;
@@ -79,7 +79,7 @@ typedef enum {
 } Cursor_Actions;
 
 typedef enum {
-    SAVE_AND_QUIT,
+    SAVE_AND_QUIT = 11,
     RESUME_GAME,
     MAIN_MENU
 } Esc_Menu_Options;
