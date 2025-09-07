@@ -106,6 +106,10 @@ int main(int argc, char** argv) {
     init_ascii_art(letters_vector);
     int menu_start_col = (window_size[COL] - MENU_WIDTH)/2, menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2; // they start with borders included btw
     Game_Session game_session;
+    //ALTHOUGH this could've been inside of quit_game, i'd rather do this cuz i m lazy 
+    game_session.menu_start_row = (window_size[ROW] - MENU_HEIGHT)/2;
+    game_session.menu_start_col = (window_size[COL] - MENU_WIDTH)/2;
+     
     // MAIN_MENU:
     do {
         int menu_input = main_menu(window_size);
@@ -118,9 +122,7 @@ int main(int argc, char** argv) {
                 if(end_menu_choice == NEW_GAME_END) {
                     goto NEW_GAME_LABEL;
                 } else if (end_menu_choice == QUIT_END) {
-                    curs_set(1);
-                    endwin();
-                    exit(0);
+                    quit_game(&game_session);//will exit 0 on it's own
                 } //MAIN_MENU // will break anyway and just go to loop back to main menu
                 // start timer, timer is gonna be a new thread that will sleep every second and whenever it wakes up it is gonna increment the time by one second
                 // pthread_t timer_thread;
@@ -152,9 +154,7 @@ int main(int argc, char** argv) {
                     if(end_menu_choice == NEW_GAME_END) {
                         goto NEW_GAME_LABEL;
                     } else if(end_menu_choice == QUIT_END) {
-                        curs_set(1);
-                        endwin();
-                        exit(0);
+                        quit_game(&game_session);
                     } else {
                         break;//exit the switch case to go loop back to main menu
                     }
@@ -165,22 +165,22 @@ int main(int argc, char** argv) {
                 for (int i = 0; i <= game_session.current_attempt; ++i) { // loop over attempts made
                     for (int j = 0; j < WORD_LENGTH; ++j) { // loop over 5 letters in every row
                         attron(COLOR_PAIR(game_session.matrix_colors[i][j]));
-                            for (int k = 0; k < CELL_HEIGHT; ++k) {
-                                revived_letter = game_session.history_matrix[i][j];
-                                mvprintw(game_session.menu_start_row+1  + (i) *(CELL_HEIGHT + 1) + k,
-                                        game_session.menu_start_col+2 + j*(CELL_WIDTH + 2),
-                                        "%s", letters_vector[revived_letter - 'a'].buffer[k]
-                                        );
-                            }
-                            attroff(COLOR_PAIR(game_session.matrix_colors[i][j]));
-                            refresh();
-                            
+                        for (int k = 0; k < CELL_HEIGHT; ++k) {
+                            revived_letter = game_session.history_matrix[i][j];
+                            mvprintw(game_session.menu_start_row+1  + (i) *(CELL_HEIGHT + 1) + k,
+                                    game_session.menu_start_col+2 + j*(CELL_WIDTH + 2),
+                                    "%s", letters_vector[revived_letter - 'a'].buffer[k]
+                                    );
                         }
+                        attroff(COLOR_PAIR(game_session.matrix_colors[i][j]));
+                        refresh();
+                            
                     }
-                    end_menu_choice = run_session(&game_session, letters_vector);
-                } else {//in case failing to load
-                    goto NEW_GAME_LABEL;
                 }
+                    end_menu_choice = run_session(&game_session, letters_vector);
+            } else {//in case failing to load
+                    goto NEW_GAME_LABEL;
+            }
                 break;
 
             case SETTINGS:
@@ -194,7 +194,8 @@ int main(int argc, char** argv) {
                 break;
 
             case QUIT:
-                goto GAME_END;
+                
+                quit_game(&game_session);
                 break;
 
             //no need for default since do nothing! , oabd: we may need default if we have no do-while loop

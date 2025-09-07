@@ -100,10 +100,9 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                         // update cursor, and its UI cursor position
                         /*
                         only move forward if:
-                            current cell is empty AND next cell is empty, so it feels like adding space to emptiness 
+                            current cell is empty 
                         */
-
-                        if(game_session->history_matrix[game_session->current_attempt][(game_session->cursor)] == ' ' && game_session->history_matrix[game_session->current_attempt][(game_session->cursor)+1] == ' ') {
+                        if(game_session->history_matrix[game_session->current_attempt][(game_session->cursor)] == ' ') {
                             change_cursor(game_session,  DELETE_CURSOR);
                             game_session->cursor += RIGHT;
                             change_cursor(game_session, PRINT_CURSOR);
@@ -111,7 +110,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
 
                     }//else do nothing
                     break;
-
+//MARK: ENTER
                 case '\n':
                     if (game_session->entered_letters < 5) {
                         // display too short
@@ -395,9 +394,7 @@ int run_session(Game_Session *game_session, Ascii_Art_Letter letters_vector[26])
                         }
                         else { // SAVE_QUIT option quit the game 
                             spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
-                            curs_set(1); // to set back the terminal cursor
-                            endwin();
-                            exit(0);
+                            quit_game(game_session);
                         }
                     }
 

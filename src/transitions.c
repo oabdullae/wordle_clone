@@ -155,8 +155,10 @@ int end_animation(Game_Session *game_session) {
     int options_left_border = game_session->menu_start_col+2 + (CELL_WIDTH+2)*2; // skip 2 cells and start
     int options_width = CELL_WIDTH*3 + 2; // take 3 cells of width
 
-    
-    spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
+    if(game_session->game_ended == false) {
+        spiral_clearing_animation(game_session->menu_start_row, game_session->menu_start_col);
+        //only run this when the game hasnt ended yet to clear the screen, 
+    }
     
     // for (int i = 0; i < MENU_WIDTH; ++i) {
     //     mvprintw(20, game_session->menu_start_col+i-1, "%d", i%10);

@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include "header.h"
 
 void init_game_colors() {
@@ -19,6 +20,8 @@ void init_game_colors() {
 
 
 }
+
+void quit_game(Game_Session *game_session);
 
 void change_cursor(Game_Session *game_session, int action) {
     attron((action == PRINT_CURSOR) ? (COLOR_PAIR(BLUE)) : A_STANDOUT); // cursor will be blue
@@ -390,3 +393,40 @@ void init_ascii_art(Ascii_Art_Letter letters_vector[26]) {
     //         break;
     // }
 }
+
+//MARK: QUIT
+void quit_game(Game_Session *game_session) {
+    //to add, a save function before quitting and making do an exit(0); should be pretty useful
+    
+    // const char* quitting_prompt = "THANKS FOR PLAYING!";//to later use if there is a print font func
+    // int qp_line1_length = strlen(quitting_prompt);
+    int quit_prompt_delay = 0;
+    int qp_line1_length = 77;
+    int qp_line2_length = 62;
+    int qp_start_row = game_session->menu_start_row + (CELL_HEIGHT+1)*2;
+    int qp_start_col = game_session->menu_start_col;
+    int current_row = qp_start_row;
+
+    usleep(20000);
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line1_length)/2, " _____   _   _    ___    _   _   _   __  _____       ______   _____  ______ ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line1_length)/2, "|_   _| | | | |  / _ \\  | \\ | | | | / / /  ___|      |  ___| |  _  | | ___ \\");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line1_length)/2, "  | |   | |_| | / /_\\ \\ |  \\| | | |/ /  \\ `--.       | |_    | | | | | |_/ /");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line1_length)/2, "  | |   |  _  | |  _  | | . ` | |    \\   `--. \\      |  _|   | | | | |    / ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line1_length)/2, "  | |   | | | | | | | | | |\\  | | |\\  \\ /\\__/ /      | |     \\ \\_/ / | |\\ \\ ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line1_length)/2, "  \\_/   \\_| |_/ \\_| |_/ \\_| \\_/ \\_| \\_/ \\____/       \\_|      \\___/  \\_| \\_|");usleep(quit_prompt_delay);refresh();
+
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line2_length)/2, "______   _        ___   __   __  _____   _   _   _____    _  ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line2_length)/2, "| ___ \\ | |      / _ \\  \\ \\ / / |_   _| | \\ | | |  __ \\  | | ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line2_length)/2, "| |_/ / | |     / /_\\ \\  \\ V /    | |   |  \\| | | |  \\/  | | ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line2_length)/2, "|  __/  | |     |  _  |   \\ /     | |   | . ` | | | __   |_| ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line2_length)/2, "| |     | |____ | | | |   | |    _| |_  | |\\  | | |_\\ \\   _  ");usleep(quit_prompt_delay);refresh();
+    mvprintw(++current_row, qp_start_col + (MENU_WIDTH - qp_line2_length)/2, "\\_|     \\_____/ \\_| |_/   \\_/    \\___/  \\_| \\_/  \\____/  |_| ");usleep(quit_prompt_delay);refresh();
+
+    refresh();
+    usleep(2000000);
+
+    //usual stuff when quitting
+    curs_set(1);
+    endwin();
+    exit(0);
+}   

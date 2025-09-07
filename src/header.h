@@ -90,4 +90,6 @@ typedef enum { // for return values of run_session()
     BACK
 } Session_Results;
 
+void quit_game(Game_Session *game_session);
+
 #endif
